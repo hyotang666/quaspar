@@ -105,11 +105,18 @@
     (setf (cell-last cell) (setf (dcons-next (cell-last cell)) cons))
     cell))
 
-(defun make-lqtree (depth)
-  (make-array
-    (loop :for i :upto depth
-          :sum (expt 4 i))
-    :initial-element (make-cell)))
+(defstruct (lqtree (:constructor make-lqtree
+                    (depth &aux
+                     (vector
+                       (make-array
+                         (loop :for i :upto depth
+                               :sum (expt 4 i))
+                         :initial-element (make-cell))))))
+  (vector #() :type vector :read-only t)
+  (depth (integer 1 *) :type (integer 1 *) :read-only t))
+
+(defmethod print-object ((o lqtree) stream)
+  (print-unreadable-object (o stream :type t)))
 
 (defun traverse (lqtree call-back)
   (labels ((rec (index &optional seen)
