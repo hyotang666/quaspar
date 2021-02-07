@@ -45,6 +45,13 @@
   "Convert morton cordinates to linear local morton space index."
   (logior (bit-separate x) (ash (bit-separate y) 1)))
 
+(defun depth (left-top right-bottom)
+  "Compute ocupied space's depth. 0 is the smallest."
+  (loop :for n = (logxor left-top right-bottom) :then (ash n -2)
+        :for i :upfrom 0
+        :if (zerop n)
+          :return i))
+
 (defun index-as-root (n)
   (do* ((n n (ash n -2))
         (i 0 (1+ i))

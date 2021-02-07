@@ -1,5 +1,5 @@
 (defpackage :quaspar.spec
-  (:import-from :quaspar #:morton-cord #:bit-separate #:space-local-index)
+  (:import-from :quaspar #:morton-cord #:bit-separate #:space-local-index #:depth)
   (:use :cl :jingoh :quaspar))
 (in-package :quaspar.spec)
 (setup :quaspar)
@@ -122,3 +122,41 @@
 :satisfies (lambda (x)
              (null (set-difference x (loop :for i :below (expt 8 2)
                                            :collect i))))
+
+(requirements-about DEPTH :doc-type function)
+
+;;;; Description:
+
+#+syntax (DEPTH left-top right-bottom) ; => result
+
+; When left-top and right-bottom have same index, it ocupy smallest space.
+#?(depth 0 0) => 0
+
+; Secondary smallest box.
+#?(depth 0 1) => 1
+#?(depth 0 2) => 1
+#?(depth 0 3) => 1
+#?(depth 2 3) => 1
+
+#?(depth 0 12) => 2
+#?(depth 0 16) => 3
+#?(depth 5 16) => 3
+
+;;;; Arguments and Values:
+
+; left-top := 
+
+; right-bottom := 
+
+; result := 
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; none
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
