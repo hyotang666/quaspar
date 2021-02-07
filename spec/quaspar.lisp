@@ -89,25 +89,25 @@
 #?(linear-index 0 0) => 0
 ;; Level 1.
 #?(uiop:while-collecting (acc)
-    (dotimes (x 2)
-      (dotimes (y 2)
-        (acc (linear-index x y)))))
+    (dotimes (h 2)
+      (dotimes (w 2)
+        (acc (linear-index w h)))))
 :satisfies (lambda (x)
              (null
                (set-difference x (loop :for i :below (expt 4 1) :collect i))))
 ;; Level 2.
 #?(uiop:while-collecting (acc)
-    (dotimes (x 4)
-      (dotimes (y 4)
-        (acc (linear-index x y)))))
+    (dotimes (h 4)
+      (dotimes (w 4)
+        (acc (linear-index w h)))))
 :satisfies (lambda (x)
              (null
                (set-difference x (loop :for i :below (expt 4 2) :collect i))))
 ;; Level 3.
 #?(uiop:while-collecting (acc)
-    (dotimes (x 8)
-      (dotimes (y 8)
-        (acc (linear-index x y)))))
+    (dotimes (h 8)
+      (dotimes (w 8)
+        (acc (linear-index w h)))))
 :satisfies (lambda (x)
              (null
                (set-difference x (loop :for i :below (expt 4 3) :collect i))))
