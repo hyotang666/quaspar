@@ -69,6 +69,27 @@
   "Compute linear index of an ocupied local space."
   (ash left-top (- (* 2 ocupied-space-depth))))
 
+(defun linear-index (x y w h max-w max-h &optional (*depth* *depth*))
+  "Compute index of background linear quad tree's vector."
+  (assert (< 0 (+ x w) max-w) ()
+    'out-of-space :name 'x
+                  :point x
+                  :range w
+                  :max max-w)
+  (assert (< 0 (+ y h) max-h) ()
+    'out-of-space :name 'y
+                  :point y
+                  :range h
+                  :max max-h)
+  (let* ((left-top
+          (multiple-value-call #'smallest-space-index
+            (morton-cord x y max-w max-h *depth*)))
+         (right-bottom
+          (multiple-value-call #'smallest-space-index
+            (morton-cord (+ x w) (+ y h) max-w max-h *depth*)))
+         (depth (depth left-top right-bottom)))
+    (+ (/ (1- (expt 4 depth)) *depth*) (space-local-index left-top depth))))
+
 (defun index-as-root (n)
   (do* ((n n (ash n -2))
         (i 0 (1+ i))
