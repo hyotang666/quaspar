@@ -2,7 +2,7 @@
 (in-package :asdf)
 (defsystem "quaspar.test"
   :version
-  "0.6.0"
+  "0.7.0"
   :depends-on
   (:jingoh "quaspar")
   :components

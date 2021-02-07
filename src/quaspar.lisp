@@ -52,6 +52,9 @@
         :if (zerop n)
           :return i))
 
+(defun space-local-index (left-top ocupied-space-depth)
+  (ash left-top (- (* 2 ocupied-space-depth))))
+
 (defun index-as-root (n)
   (do* ((n n (ash n -2))
         (i 0 (1+ i))

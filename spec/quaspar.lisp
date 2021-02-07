@@ -1,5 +1,6 @@
 (defpackage :quaspar.spec
-  (:import-from :quaspar #:morton-cord #:bit-separate #:smallest-space-index #:depth)
+  (:import-from :quaspar #:morton-cord #:bit-separate #:smallest-space-index #:depth
+                #:space-local-index)
   (:use :cl :jingoh :quaspar))
 (in-package :quaspar.spec)
 (setup :quaspar)
@@ -147,6 +148,40 @@
 ; left-top := 
 
 ; right-bottom := 
+
+; result := 
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; none
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+(requirements-about SPACE-LOCAL-INDEX :doc-type function)
+
+;;;; Description:
+
+#+syntax (SPACE-LOCAL-INDEX left-top ocupied-space-depth) ; => result
+
+; When depth is smallest (i.e. zero), left-top is returned.
+#?(space-local-index 0 0) => 0
+#?(space-local-index 10 0) => 10
+
+; Secandary smallest space index.
+#?(space-local-index 1 1) => 0
+#?(space-local-index 2 1) => 0
+#?(space-local-index 3 1) => 0
+#?(space-local-index 4 1) => 1
+#?(space-local-index 4 2) => 0
+;;;; Arguments and Values:
+
+; left-top := 
+
+; ocupied-space-depth := 
 
 ; result := 
 
