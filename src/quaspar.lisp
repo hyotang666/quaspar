@@ -20,10 +20,10 @@
          (values (integer 0 *) (integer 0 *) &optional))
         morton-cord))
 
-(defun morton-cord (x y w h &optional (depth *depth*))
+(defun morton-cord (x y max-w max-h &optional (depth *depth*))
   "Convert cordinates to morton spaces cordinates."
   (let ((expt (expt 2 depth)))
-    (values (floor x (/ (float w) expt)) (floor y (/ (float h) expt)))))
+    (values (floor x (/ (float max-w) expt)) (floor y (/ (float max-h) expt)))))
 
 (declaim
  (ftype (function ((unsigned-byte 16)) (values (unsigned-byte 32) &optional))
@@ -42,7 +42,7 @@
         smallest-space-index))
 
 (defun smallest-space-index (x y)
-  "Convert morton cordinates to linear local morton space index."
+  "Convert morton cordinates to linear max depth morton space index."
   (logior (bit-separate x) (ash (bit-separate y) 1)))
 
 (defun depth (left-top right-bottom)
@@ -53,6 +53,7 @@
           :return i))
 
 (defun space-local-index (left-top ocupied-space-depth)
+  "Compute linear index of an ocupied local space."
   (ash left-top (- (* 2 ocupied-space-depth))))
 
 (defun index-as-root (n)
