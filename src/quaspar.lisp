@@ -36,7 +36,14 @@
          (n (logand (logior (ash n 1) n) #x55555555)))
     n))
 
-(defun morton-index (x y) (logior (bit-separate x) (ash (bit-separate y) 1)))
+(declaim
+ (ftype (function ((unsigned-byte 16) (unsigned-byte 16))
+         (values (unsigned-byte 32) &optional))
+        linear-index))
+
+(defun linear-index (x y)
+  "Convert morton cordinates to linear morton index."
+  (logior (bit-separate x) (ash (bit-separate y) 1)))
 
 (defun index-as-root (n)
   (do* ((n n (ash n -2))
@@ -51,8 +58,8 @@
   (multiple-value-bind (index depth)
       (index-as-root
         (logand
-          (multiple-value-call #'morton-index (morton-cord x y max-w max-h))
-          (multiple-value-call #'morton-index
+          (multiple-value-call #'linear-index (morton-cord x y max-w max-h))
+          (multiple-value-call #'linear-index
             (morton-cord (+ x w) (+ y h) max-w max-h))))
     (+ index (/ (expt 4 depth) *depth*))))
 
