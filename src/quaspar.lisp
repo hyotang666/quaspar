@@ -11,6 +11,8 @@
 
 (defparameter *depth* 4)
 
+(declaim (type (integer 1 *) *depth*))
+
 (defun morton-cord (x y w h &optional (depth *depth*))
   (let ((expt (expt 2 depth)))
     (values (floor x (/ (float w) expt)) (floor y (/ (float h) expt)))))
