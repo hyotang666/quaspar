@@ -25,6 +25,10 @@
   (let ((expt (expt 2 depth)))
     (values (floor x (/ (float w) expt)) (floor y (/ (float h) expt)))))
 
+(declaim
+ (ftype (function ((unsigned-byte 16)) (values (unsigned-byte 32) &optional))
+        bit-separate))
+
 (defun bit-separate (integer)
   (let* ((n (logand (logior (ash integer 8) integer) #xFF00FF))
          (n (logand (logior (ash n 4) n) #xF0F0F0F))

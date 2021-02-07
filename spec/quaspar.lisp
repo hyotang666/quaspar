@@ -1,5 +1,5 @@
 (defpackage :quaspar.spec
-  (:import-from :quaspar #:morton-cord)
+  (:import-from :quaspar #:morton-cord #:bit-separate)
   (:use :cl :jingoh :quaspar))
 (in-package :quaspar.spec)
 (setup :quaspar)
@@ -44,3 +44,32 @@
 
 ;;;; Exceptional-Situations:
 
+(requirements-about BIT-SEPARATE :doc-type function)
+
+;;;; Description:
+
+#+syntax (BIT-SEPARATE integer) ; => result
+
+;;;; Arguments and Values:
+
+; integer := (unsigned-byte 8)
+
+; result := (unsigned-byte 16)
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+;;;; TEST
+#?(bit-separate #B111) => #B010101
+#?(bit-separate #B1111) => #B01010101
+#?(bit-separate #xFF) => #B0101010101010101
+#?(bit-separate #xFFFF) => #B01010101010101010101010101010101
+#?(bit-separate  0) => 0
+#?(bit-separate  1) => 1
+#?(bit-separate  #B10) => #B0100
+#?(bit-separate -1) :signals condition
