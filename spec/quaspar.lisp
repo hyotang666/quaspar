@@ -1,5 +1,5 @@
 (defpackage :quaspar.spec
-  (:import-from :quaspar #:morton-cord #:bit-separate #:space-local-index #:depth)
+  (:import-from :quaspar #:morton-cord #:bit-separate #:smallest-space-index #:depth)
   (:use :cl :jingoh :quaspar))
 (in-package :quaspar.spec)
 (setup :quaspar)
@@ -79,12 +79,12 @@
 #?(bit-separate  1) => 1
 #?(bit-separate  #B10) => #B0100
 #?(bit-separate -1) :signals condition
-(requirements-about SPACE-LOCAL-INDEX :doc-type function)
+(requirements-about smallest-space-index :doc-type function)
 
 ;;;; Description:
 ; Convert morton cordinates to linear local morton space index.
 
-#+syntax (SPACE-LOCAL-INDEX x y) ; => result
+#+syntax (smallest-space-index x y) ; => result
 
 ;;;; Arguments and Values:
 
@@ -104,7 +104,7 @@
 
 #?(loop :for h :below 8
         :collect (loop :for w :below 8
-                       :collect (space-local-index w h)))
+                       :collect (smallest-space-index w h)))
 => (( 0  1  4  5 16 17 20 21)
     ( 2  3  6  7 18 19 22 23)
     ( 8  9 12 13 24 25 28 29)
@@ -118,7 +118,7 @@
 #?(uiop:while-collecting (acc)
     (dotimes (h 8)
       (dotimes (w 8)
-        (acc (space-local-index w h)))))
+        (acc (smallest-space-index w h)))))
 :satisfies (lambda (x)
              (null (set-difference x (loop :for i :below (expt 8 2)
                                            :collect i))))
