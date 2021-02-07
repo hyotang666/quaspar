@@ -36,6 +36,10 @@
 
 ;;;; Affected By:
 ; *DEPTH*
+#?(morton-cord 48 80 100 100 0) :values (0 0) ; (array * (1))
+#?(morton-cord 48 80 100 100 1) :values (0 1) ; (array * (2 2))
+#?(morton-cord 48 80 100 100 2) :values (1 3) ; (array * (4 4))
+#?(morton-cord 48 80 100 100 3) :values (3 6) ; (array * (8 8))
 
 ;;;; Side-Effects:
 ; None
