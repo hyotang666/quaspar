@@ -128,6 +128,12 @@
                      (rec (1+ index) seen))))))
     (rec 0)))
 
+(defmacro do-lqtree ((var lqtree) &body body)
+  (let ((cell (gensym "CELL")))
+    `(loop :for ,cell :across (lqtree-vector ,lqtree)
+           :for ,var = (cell-content ,cell)
+           :do (progn ,@body))))
+
 (defun ref (lqtree x y w h max-w max-h)
   (aref (lqtree-vector lqtree) (morton-space-index x y w h max-w max-h)))
 
