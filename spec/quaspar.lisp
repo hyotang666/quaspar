@@ -1,5 +1,5 @@
 (defpackage :quaspar.spec
-  (:import-from :quaspar #:morton-cord #:bit-separate)
+  (:import-from :quaspar #:morton-cord #:bit-separate #:linear-index)
   (:use :cl :jingoh :quaspar))
 (in-package :quaspar.spec)
 (setup :quaspar)
@@ -77,3 +77,56 @@
 #?(bit-separate  1) => 1
 #?(bit-separate  #B10) => #B0100
 #?(bit-separate -1) :signals condition
+
+(requirements-about LINEAR-INDEX :doc-type function)
+
+;;;; Description:
+; Convert morton cordinates to linear morton index.
+
+#+syntax (LINEAR-INDEX x y) ; => result
+
+;; Level 0 or more
+#?(linear-index 0 0) => 0
+;; Level 1.
+#?(uiop:while-collecting (acc)
+    (dotimes (x 2)
+      (dotimes (y 2)
+        (acc (linear-index x y)))))
+:satisfies (lambda (x)
+             (null
+               (set-difference x (loop :for i :below (expt 4 1) :collect i))))
+;; Level 2.
+#?(uiop:while-collecting (acc)
+    (dotimes (x 4)
+      (dotimes (y 4)
+        (acc (linear-index x y)))))
+:satisfies (lambda (x)
+             (null
+               (set-difference x (loop :for i :below (expt 4 2) :collect i))))
+;; Level 3.
+#?(uiop:while-collecting (acc)
+    (dotimes (x 8)
+      (dotimes (y 8)
+        (acc (linear-index x y)))))
+:satisfies (lambda (x)
+             (null
+               (set-difference x (loop :for i :below (expt 4 3) :collect i))))
+
+;;;; Arguments and Values:
+
+; x := (unsigned-byte 16)
+
+; y := (unsigned-byte 16)
+
+; result := (unsigned-byte 32)
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; none
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
