@@ -114,6 +114,9 @@
              (null
                (set-difference x (loop :for i :below (expt 4 3) :collect i))))
 
+#?(linear-index 5 1) => 19
+#?(linear-index 7 3) => 31
+
 ;;;; Arguments and Values:
 
 ; x := (unsigned-byte 16)
