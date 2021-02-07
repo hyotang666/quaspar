@@ -13,7 +13,15 @@
 
 (declaim (type (integer 1 *) *depth*))
 
+(declaim
+ (ftype (function
+         ((integer 0 *) (integer 0 *) (integer 0 *) (integer 0 *) &optional
+          (integer 0 *))
+         (values (integer 0 *) (integer 0 *) &optional))
+        morton-cord))
+
 (defun morton-cord (x y w h &optional (depth *depth*))
+  "Convert cordinates to morton spaces cordinates."
   (let ((expt (expt 2 depth)))
     (values (floor x (/ (float w) expt)) (floor y (/ (float h) expt)))))
 
