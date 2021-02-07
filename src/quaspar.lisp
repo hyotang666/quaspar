@@ -7,6 +7,19 @@
 
 (in-package :quaspar)
 
+;;;; CONDITION
+
+(define-condition out-of-space (cell-error)
+  ((point :initarg :point :reader point)
+   (range :initarg :range :reader range)
+   (max :initarg :max :reader max-of))
+  (:report
+   (lambda (condition stream)
+     (format stream
+             "Out of range ~A: Point ~S + Range ~S = ~S must smaller than ~S."
+             (cell-error-name condition) (point condition) (range condition)
+             (+ (point condition) (range condition)) (max-of condition)))))
+
 ;;;; MORTON-ORDER-SPACES
 
 (defparameter *depth* 4)
