@@ -39,10 +39,10 @@
 (declaim
  (ftype (function ((unsigned-byte 16) (unsigned-byte 16))
          (values (unsigned-byte 32) &optional))
-        linear-index))
+        space-local-index))
 
-(defun linear-index (x y)
-  "Convert morton cordinates to linear morton index."
+(defun space-local-index (x y)
+  "Convert morton cordinates to linear local morton space index."
   (logior (bit-separate x) (ash (bit-separate y) 1)))
 
 (defun index-as-root (n)

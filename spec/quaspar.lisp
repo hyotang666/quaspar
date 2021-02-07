@@ -1,5 +1,5 @@
 (defpackage :quaspar.spec
-  (:import-from :quaspar #:morton-cord #:bit-separate #:linear-index)
+  (:import-from :quaspar #:morton-cord #:bit-separate #:space-local-index)
   (:use :cl :jingoh :quaspar))
 (in-package :quaspar.spec)
 (setup :quaspar)
@@ -79,43 +79,12 @@
 #?(bit-separate  1) => 1
 #?(bit-separate  #B10) => #B0100
 #?(bit-separate -1) :signals condition
-
-(requirements-about LINEAR-INDEX :doc-type function)
+(requirements-about SPACE-LOCAL-INDEX :doc-type function)
 
 ;;;; Description:
-; Convert morton cordinates to linear morton index.
+; Convert morton cordinates to linear local morton space index.
 
-#+syntax (LINEAR-INDEX x y) ; => result
-
-;; Level 0 or more
-#?(linear-index 0 0) => 0
-;; Level 1.
-#?(uiop:while-collecting (acc)
-    (dotimes (h 2)
-      (dotimes (w 2)
-        (acc (linear-index w h)))))
-:satisfies (lambda (x)
-             (null
-               (set-difference x (loop :for i :below (expt 4 1) :collect i))))
-;; Level 2.
-#?(uiop:while-collecting (acc)
-    (dotimes (h 4)
-      (dotimes (w 4)
-        (acc (linear-index w h)))))
-:satisfies (lambda (x)
-             (null
-               (set-difference x (loop :for i :below (expt 4 2) :collect i))))
-;; Level 3.
-#?(uiop:while-collecting (acc)
-    (dotimes (h 8)
-      (dotimes (w 8)
-        (acc (linear-index w h)))))
-:satisfies (lambda (x)
-             (null
-               (set-difference x (loop :for i :below (expt 4 3) :collect i))))
-
-#?(linear-index 5 1) => 19
-#?(linear-index 7 3) => 31
+#+syntax (SPACE-LOCAL-INDEX x y) ; => result
 
 ;;;; Arguments and Values:
 
@@ -126,12 +95,30 @@
 ; result := (unsigned-byte 32)
 
 ;;;; Affected By:
-; none
 
 ;;;; Side-Effects:
-; none
 
 ;;;; Notes:
 
 ;;;; Exceptional-Situations:
 
+#?(loop :for h :below 8
+        :collect (loop :for w :below 8
+                       :collect (space-local-index w h)))
+=> (( 0  1  4  5 16 17 20 21)
+    ( 2  3  6  7 18 19 22 23)
+    ( 8  9 12 13 24 25 28 29)
+    (10 11 14 15 26 27 30 31)
+    (32 33 36 37 48 49 52 53)
+    (34 35 38 39 50 51 54 55)
+    (40 41 44 45 56 57 60 61)
+    (42 43 46 47 58 59 62 63))
+,:test equal
+
+#?(uiop:while-collecting (acc)
+    (dotimes (h 8)
+      (dotimes (w 8)
+        (acc (space-local-index w h)))))
+:satisfies (lambda (x)
+             (null (set-difference x (loop :for i :below (expt 8 2)
+                                           :collect i))))
