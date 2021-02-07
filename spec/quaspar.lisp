@@ -12,6 +12,8 @@
 
 #?(MORTON-CORD 48 80 100 100 3)
 :values (3 6)
+#?(morton-cord 55 15 80 80 3) :values (5 1)
+#?(morton-cord 75 35 80 80 3) :values (7 3)
 
 ;;;; Arguments and Values:
 
