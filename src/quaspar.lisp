@@ -127,3 +127,10 @@
                      (funcall call-back seen)
                      (rec (1+ index) seen))))))
     (rec 0)))
+
+(defun ref (lqtree x y w h max-w max-h)
+  (aref (lqtree-vector lqtree) (morton-space-index x y w h max-w max-h)))
+
+(defun (setf ref) (new lqtree x y w h max-w max-h)
+  (setf (aref (lqtree-vector lqtree) (morton-space-index x y w h max-w max-h))
+          new))
