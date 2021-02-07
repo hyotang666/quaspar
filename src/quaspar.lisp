@@ -90,24 +90,6 @@
          (depth (depth left-top right-bottom)))
     (+ (/ (1- (expt 4 depth)) *depth*) (space-local-index left-top depth))))
 
-(defun index-as-root (n)
-  (do* ((n n (ash n -2))
-        (i 0 (1+ i))
-        (byte (ldb (byte 2 0) n) (ldb (byte 2 0) n))
-        result)
-       ((zerop n) (values result i))
-    (unless (zerop byte)
-      (setf result byte))))
-
-(defun morton-space-index (x y w h max-w max-h &optional (*depth* *depth*))
-  (multiple-value-bind (index depth)
-      (index-as-root
-        (logand
-          (multiple-value-call #'linear-index (morton-cord x y max-w max-h))
-          (multiple-value-call #'linear-index
-            (morton-cord (+ x w) (+ y h) max-w max-h))))
-    (+ index (/ (expt 4 depth) *depth*))))
-
 ;;;; DOUBLE-LINKED-LIST
 
 (defstruct dcons prev next content)
