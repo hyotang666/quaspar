@@ -85,6 +85,15 @@
   (setf (dcons-next (dcons-prev dcons)) (dcons-next dcons))
   t)
 
+(defmacro do-dlist ((var dlist) &body body)
+  (let ((v (gensym "DLIST")))
+    `(do* ((,v ,dlist (dcons-next ,v))
+           (,var (dcons-content ,v) (dcons-content ,v)))
+          (nil)
+      ,@body
+       (when (null (dcons-next ,v))
+         (return)))))
+
 ;;;; LQTREE
 
 (defstruct cell last first)
