@@ -161,10 +161,6 @@
 
 ;;;; LQTREE
 
-(defstruct cell last first)
-
-(defun empty-cell-p (cell) (null (cell-first cell)))
-
 (defun insert (object cell)
   (let ((cons (make-dcons :content object :prev (cell-last cell))))
     (setf (cell-last cell) (setf (dcons-next (cell-last cell)) cons))
