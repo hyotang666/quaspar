@@ -242,3 +242,14 @@
 
 (defun delete (storable lqtree)
   (delete-from-cell storable (aref (lqtree-vector lqtree) (index storable))))
+
+(defun move (storable x y max-w max-h lqtree)
+  (setf (x (rect storable)) x
+        (y (rect storable)) y)
+  (let ((new-space
+         (linear-index x y (w storable) (h storable) max-w max-h *depth*)))
+    (if (= new-space (index storable))
+        storable
+        (progn
+         (delete storable lqtree)
+         (store storable (aref (lqtree-vector lqtree) new-space))))))
