@@ -24,7 +24,18 @@
 
 (defparameter *depth* 4)
 
-(declaim (type (integer 1 *) *depth*))
+;; Currently supported *DEPTH* is declaimed below.
+;; This is depends on BIT-SEPARATE algorithm.
+
+(declaim
+ (type
+  (integer 0 15
+   #+(or) ; How to compute above max value is.
+   (loop :for i :upfrom 0
+         :if (< #xFFFFFFFF ; <--- (unsigned-byte 32)
+                (linear-quad-length i))
+           :return (1- i)))
+  *depth*))
 
 (declaim
  (ftype (function
@@ -179,16 +190,19 @@
 
 ;;;; LQTREE
 
+(defun linear-quad-length (depth)
+  (loop :for i :upto depth
+        :sum (expt 4 i)))
 
 (defstruct (lqtree (:constructor make-lqtree
                     (depth &aux
-                     (vector
-                       (make-array
-                         (loop :for i :upto depth
-                               :sum (expt 4 i))
-                         :initial-element (make-cell))))))
+                           (vector
+                             (let* ((length (linear-quad-length depth))
+                                    (vector (make-array length)))
+                               (dotimes (i length vector)
+                                 (setf (aref vector i) (make-cell))))))))
   (vector #() :type vector :read-only t)
-  (depth (integer 1 *) :type (integer 1 *) :read-only t))
+  (depth *depth* :type (integer 0 15) :read-only t))
 
 (defmethod print-object ((o lqtree) stream)
   (print-unreadable-object (o stream :type t)))
