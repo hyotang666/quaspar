@@ -5,8 +5,6 @@
   (:use :cl)
   (:export ;;; Condition
            #:out-of-space
-           ;;; Special vars
-           #:*rect-constructor*
            ;;; LQTREE
            #:lqtree ; type-name
            #:make-lqtree ; constructor
@@ -135,10 +133,6 @@
 (defun make-rect (&key (x 0) (y 0) (w 0) (h 0))
   (make-instance 'rect :x x :y y :w w :h h))
 
-(defparameter *rect-constructor* 'make-rect)
-
-(declaim (type (or symbol function) *rect-constructor*))
-
 ;;;; SPACE
 
 (deftype space () '(or (cons null null) (cons lqtree-storable lqtree-storable)))
@@ -168,17 +162,18 @@
          ;; NIL means last of the list.
          :type (or null lqtree-storable)
          :documentation "Next object of the list."))
-  (:default-initargs :x 0 :y 0 :w 0 :h 0 :depth 4)
+  (:default-initargs :x 0 :y 0 :w 0 :h 0 :depth 4 :rect-constructor 'make-rect)
   (:documentation "Inherit this to store object for lqtree."))
 
 (defmethod initialize-instance
            ((o lqtree-storable)
             &rest args
             &key x y w h (max-w (error "MAX-W is required."))
-            (max-h (error "MAX-H is reqrured.")) depth index rect)
+            (max-h (error "MAX-H is reqrured.")) depth index rect
+            rect-constructor)
   (multiple-value-call #'call-next-method
     (values :index (or index (linear-index x y w h max-w max-h depth)))
-    (values :rect (or rect (funcall *rect-constructor* :x x :y y :w w :h h)))
+    (values :rect (or rect (funcall rect-constructor :x x :y y :w w :h h)))
     (values-list args)))
 
 (defun delete-from-space (storable space)
