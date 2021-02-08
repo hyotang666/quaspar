@@ -1,4 +1,5 @@
 (defpackage :quaspar.spec
+  (:shadowing-import-from :quaspar space delete)
   (:import-from :quaspar #:morton-cord #:bit-separate #:smallest-space-index #:depth
                 #:space-local-index)
   (:use :cl :jingoh :quaspar))
@@ -194,4 +195,27 @@
 ;;;; Notes:
 
 ;;;; Exceptional-Situations:
+
+(requirements-about OUT-OF-SPACE :doc-type TYPE)
+
+;;;; Description:
+; Signaled when RECT over LQTREE max range.
+;;;; Class Precedence List: (case in SBCL)
+; out-of-space cell-error error serious-condition condition slot-object t
+
+;;;; Effective Slots:
+
+; POINT [Type] T
+; [READER] point
+
+; RANGE [Type] T
+; [READER] range
+
+; MAX [Type] T
+; [READER] max-of
+
+; NAME [Type] T
+; [READER] cell-error-name
+
+;;;; Notes:
 
