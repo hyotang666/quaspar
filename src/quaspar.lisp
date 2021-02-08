@@ -90,6 +90,25 @@
          (depth (depth left-top right-bottom)))
     (+ (/ (1- (expt 4 depth)) *depth*) (space-local-index left-top depth))))
 
+;;;; RECT
+;; In order to update cordinates at once, we needs RECT object.
+
+(defclass rect ()
+  ((x :initarg :x :initform 0 :accessor x)
+   (y :initarg :y :initform 0 :accessor y)
+   (w :initarg :w :initform 0 :reader w)
+   (h :initarg :h :initform 0 :reader h))
+  (:documentation "The default rect object for LQTREE-STORABLE."))
+
+(defmethod print-object ((o rect) stream)
+  (print-unreadable-object (o stream :type t)
+    (format stream "x ~S y ~S w ~S h ~S" (x o) (y o) (w o) (h o))))
+
+(defun make-rect (&key (x 0) (y 0) (w 0) (h 0))
+  (make-instance 'rect :x x :y y :w w :h h))
+
+(defparameter *rect-constructor* 'make-rect)
+
 ;;;; LQTREE-STORABLE
 
 (defclass lqtree-storable ()
