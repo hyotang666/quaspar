@@ -215,17 +215,20 @@
   (print-unreadable-object (o stream :type t)))
 
 (defun cell (lqtree x y w h max-w max-h &optional (*depth* *depth*))
-  (aref lqtree (linear-index x y w h max-w max-h *depth*)))
+  (aref (lqtree-vector lqtree) (linear-index x y w h max-w max-h *depth*)))
 
 (defun (setf cell) (new lqtree x y w h max-w max-h &optional (*depth* *depth*))
   (store new (cell lqtree x y w h max-w max-h *depth*)))
 
 (defun traverse (lqtree call-back)
   (labels ((rec (index &optional seen)
-             (when (array-in-bounds-p lqtree index)
-               (if (empty-cell-p (aref lqtree index))
+             (when (array-in-bounds-p (lqtree-vector lqtree) index)
+               (if (empty-cell-p (aref (lqtree-vector lqtree) index))
                    (rec (1+ index))
-                   (let ((seen (cons (cell-content (aref lqtree index)) seen)))
+                   (let ((seen
+                          (cons
+                            (cell-content (aref (lqtree-vector lqtree) index))
+                            seen)))
                      (funcall call-back seen)
                      (rec (1+ index) seen))))))
     (rec 0)))
@@ -238,4 +241,4 @@
                  ,@body))))
 
 (defun delete (storable lqtree)
-  (delete-from-cell storable (aref (index storable) lqtree)))
+  (delete-from-cell storable (aref (lqtree-vector lqtree) (index storable))))
