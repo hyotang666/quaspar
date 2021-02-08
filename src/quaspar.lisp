@@ -137,6 +137,8 @@
 
 (defparameter *rect-constructor* 'make-rect)
 
+(declaim (type (or symbol function) *rect-constructor*))
+
 ;;;; SPACE
 
 (deftype space () '(or (cons null null) (cons lqtree-storable lqtree-storable)))
