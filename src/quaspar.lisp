@@ -169,11 +169,13 @@
                 (cell-last cell) nil)))
   (values))
 
-(defun add-stroable (a b)
-  (setf (next b) a
-        (prev a) b
-        (index a) (index b))
-  nil)
+(defun store (storable cell)
+  (if (empty-cell-p cell)
+      (setf (cell-content cell) storable
+            (cell-last cell) storable)
+      (setf (prev storable) (cell-last cell)
+            (next (cell-last cell)) storable
+            (cell-last cell) storable)))
 
 ;;;; LQTREE
 
