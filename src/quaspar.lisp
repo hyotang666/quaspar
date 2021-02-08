@@ -237,3 +237,5 @@
            :for ,var = (cell-content ,cell)
            :do (progn ,@body))))
 
+(defun delete (storable lqtree)
+  (delete-from-cell storable (aref (index storable) lqtree)))
