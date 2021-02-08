@@ -179,10 +179,6 @@
 
 ;;;; LQTREE
 
-(defun insert (object cell)
-  (let ((cons (make-dcons :content object :prev (cell-last cell))))
-    (setf (cell-last cell) (setf (dcons-next (cell-last cell)) cons))
-    cell))
 
 (defstruct (lqtree (:constructor make-lqtree
                     (depth &aux
