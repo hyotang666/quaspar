@@ -218,7 +218,7 @@
              (when (array-in-bounds-p lqtree index)
                (if (empty-cell-p (aref lqtree index))
                    (rec (1+ index))
-                   (let ((seen (cons (cell-first (aref lqtree index)) seen)))
+                   (let ((seen (cons (cell-content (aref lqtree index)) seen)))
                      (funcall call-back seen)
                      (rec (1+ index) seen))))))
     (rec 0)))
