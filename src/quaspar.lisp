@@ -1,7 +1,7 @@
 (in-package :cl-user)
 
 (defpackage :quaspar
-  (:shadow delete)
+  (:shadow delete space)
   (:use :cl)
   (:export))
 
@@ -120,21 +120,21 @@
 
 (defparameter *rect-constructor* 'make-rect)
 
-;;;; CELL
+;;;; SPACE
 
-(deftype cell () '(or (cons null null) (cons lqtree-storable lqtree-storable)))
+(deftype space () '(or (cons null null) (cons lqtree-storable lqtree-storable)))
 
-(defun make-cell () (list nil))
+(defun make-space () (list nil))
 
-(defun empty-cell-p (cell) (null (car cell)))
+(defun empty-space-p (space) (null (car space)))
 
-(defun cell-content (cell) (car cell))
+(defun space-contents (space) (car space))
 
-(defun (setf cell-content) (new cell) (setf (car cell) new))
+(defun (setf space-contents) (new space) (setf (car space) new))
 
-(defun cell-last (cell) (cdr cell))
+(defun space-last (space) (cdr space))
 
-(defun (setf cell-last) (new cell) (setf (cdr cell) new))
+(defun (setf space-last) (new space) (setf (cdr space) new))
 
 ;;;; LQTREE-STORABLE
 
@@ -162,34 +162,34 @@
     (values :rect (or rect (funcall *rect-constructor* :x x :y y :w w :h h)))
     (values-list args)))
 
-(defun delete-from-cell (storable cell)
+(defun delete-from-space (storable space)
   (if (prev storable)
       (if (next storable)
           ;; Between two storables.
           (setf (next (prev storable)) (next storable)
                 (prev (next storable)) (prev storable))
-          ;; Last in cell
+          ;; Last in space
           (setf (next (prev storable)) nil
-                (cell-last cell) (prev storable)))
+                (space-last space) (prev storable)))
       (if (next storable)
-          ;; First in cell
+          ;; First in space
           (setf (prev (next storable)) nil
-                (cell-content cell) (next storable))
-          ;; Only one storable in cell.
-          (setf (cell-content cell) nil
-                (cell-last cell) nil)))
+                (space-contents space) (next storable))
+          ;; Only one storable in space.
+          (setf (space-contents space) nil
+                (space-last space) nil)))
   (values))
 
-(defun store (storable cell)
-  (if (empty-cell-p cell)
-      (setf (cell-content cell) storable
-            (cell-last cell) storable)
-      (setf (prev storable) (cell-last cell)
-            (next (cell-last cell)) storable
-            (cell-last cell) storable)))
+(defun store (storable space)
+  (if (empty-space-p space)
+      (setf (space-contents space) storable
+            (space-last space) storable)
+      (setf (prev storable) (space-last space)
+            (next (space-last space)) storable
+            (space-last space) storable)))
 
-(defmacro do-stored ((var cell) &body body)
-  `(do ((,var (cell-content ,cell) (next ,var)))
+(defmacro do-stored ((var space) &body body)
+  `(do ((,var (space-contents ,space) (next ,var)))
        (nil)
     ,@body
      (when (null (next ,var))
@@ -207,27 +207,29 @@
                              (let* ((length (linear-quad-length depth))
                                     (vector (make-array length)))
                                (dotimes (i length vector)
-                                 (setf (aref vector i) (make-cell))))))))
+                                 (setf (aref vector i) (make-space))))))))
   (vector #() :type vector :read-only t)
   (depth *depth* :type (integer 0 15) :read-only t))
 
 (defmethod print-object ((o lqtree) stream)
   (print-unreadable-object (o stream :type t)))
 
-(defun cell (lqtree x y w h max-w max-h &optional (*depth* *depth*))
+(defun space (lqtree x y w h max-w max-h &optional (*depth* *depth*))
   (aref (lqtree-vector lqtree) (linear-index x y w h max-w max-h *depth*)))
 
-(defun (setf cell) (new lqtree x y w h max-w max-h &optional (*depth* *depth*))
-  (store new (cell lqtree x y w h max-w max-h *depth*)))
+(defun (setf space)
+       (new lqtree x y w h max-w max-h &optional (*depth* *depth*))
+  (store new (space lqtree x y w h max-w max-h *depth*)))
 
 (defun traverse (lqtree call-back)
   (labels ((rec (index &optional seen)
              (when (array-in-bounds-p (lqtree-vector lqtree) index)
-               (if (empty-cell-p (aref (lqtree-vector lqtree) index))
+               (if (empty-space-p (aref (lqtree-vector lqtree) index))
                    (rec (1+ index))
                    (let ((seen
                           (cons
-                            (cell-content (aref (lqtree-vector lqtree) index))
+                            (space-contents
+                              (aref (lqtree-vector lqtree) index))
                             seen)))
                      (funcall call-back seen)
                      (rec (1+ index) seen))))))
@@ -235,13 +237,13 @@
 
 (defmacro do-lqtree ((var lqtree) &body body)
   "Iterate over every objects in lqtree."
-  (let ((cell (gensym "CELL")))
-    `(loop :for ,cell :across (lqtree-vector ,lqtree)
-           :do (do-stored (,var ,cell)
+  (let ((space (gensym "SPACE")))
+    `(loop :for ,space :across (lqtree-vector ,lqtree)
+           :do (do-stored (,var ,space)
                  ,@body))))
 
 (defun delete (storable lqtree)
-  (delete-from-cell storable (aref (lqtree-vector lqtree) (index storable))))
+  (delete-from-space storable (aref (lqtree-vector lqtree) (index storable))))
 
 (defun move (storable x y max-w max-h lqtree)
   (setf (x (rect storable)) x
