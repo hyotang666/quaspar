@@ -234,8 +234,8 @@
   "Iterate over every objects in lqtree."
   (let ((cell (gensym "CELL")))
     `(loop :for ,cell :across (lqtree-vector ,lqtree)
-           :for ,var = (cell-content ,cell)
-           :do (progn ,@body))))
+           :do (do-stored (,var ,cell)
+                 ,@body))))
 
 (defun delete (storable lqtree)
   (delete-from-cell storable (aref (index storable) lqtree)))
