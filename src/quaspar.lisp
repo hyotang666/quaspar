@@ -151,7 +151,23 @@
     (values :rect (or rect (funcall *rect-constructor* :x x :y y :w w :h h)))
     (values-list args)))
 
-(defun delete (storable) (setf (next (prev storable)) (next storable)) t)
+(defun delete-from-cell (storable cell)
+  (if (prev storable)
+      (if (next storable)
+          ;; Between two storables.
+          (setf (next (prev storable)) (next storable)
+                (prev (next storable)) (prev storable))
+          ;; Last in cell
+          (setf (next (prev storable)) nil
+                (cell-last cell) (prev storable)))
+      (if (next storable)
+          ;; First in cell
+          (setf (prev (next storable)) nil
+                (cell-content cell) (next storable))
+          ;; Only one storable in cell.
+          (setf (cell-content cell) nil
+                (cell-last cell) nil)))
+  (values))
 
 (defun add-stroable (a b)
   (setf (next b) a
