@@ -109,6 +109,22 @@
 
 (defparameter *rect-constructor* 'make-rect)
 
+;;;; CELL
+
+(deftype cell () '(or (cons null null) (cons lqtree-storable lqtree-storable)))
+
+(defun make-cell () (list nil))
+
+(defun empty-cell-p (cell) (null (car cell)))
+
+(defun cell-content (cell) (car cell))
+
+(defun (setf cell-content) (new cell) (setf (car cell) new))
+
+(defun cell-last (cell) (cdr cell))
+
+(defun (setf cell-last) (new cell) (setf (cdr cell) new))
+
 ;;;; LQTREE-STORABLE
 
 (defclass lqtree-storable ()
