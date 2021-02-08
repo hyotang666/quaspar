@@ -219,3 +219,26 @@
 
 ;;;; Notes:
 
+(requirements-about RECT :doc-type TYPE)
+
+;;;; Description:
+; The default rect object for LQTREE-STORABLE.
+;;;; Class Precedence List: (case in SBCL)
+; rect standard-object slot-object t
+
+;;;; Effective Slots:
+
+; X [Type] (INTEGER 0 *)
+; [ACCESSOR] x
+
+; Y [Type] (INTEGER 0 *)
+; [ACCESSOR] y
+
+; W [Type] (INTEGER 0 *)
+; [READER] w
+
+; H [Type] (INTEGER 0 *)
+; [READER] h
+
+;;;; Notes:
+

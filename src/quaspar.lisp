@@ -120,10 +120,10 @@
 ;; In order to update cordinates at once, we needs RECT object.
 
 (defclass rect ()
-  ((x :initarg :x :initform 0 :accessor x)
-   (y :initarg :y :initform 0 :accessor y)
-   (w :initarg :w :initform 0 :reader w)
-   (h :initarg :h :initform 0 :reader h))
+  ((x :initarg :x :initform 0 :accessor x :type (integer 0 *))
+   (y :initarg :y :initform 0 :accessor y :type (integer 0 *))
+   (w :initarg :w :initform 0 :reader w :type (integer 0 *))
+   (h :initarg :h :initform 0 :reader h :type (integer 0 *)))
   (:documentation "The default rect object for LQTREE-STORABLE."))
 
 (defmethod print-object ((o rect) stream)
