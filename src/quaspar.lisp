@@ -235,25 +235,26 @@
   (loop :for i :upto depth
         :sum (expt 4 i)))
 
-(defstruct (lqtree (:constructor make-lqtree
-                    (depth &aux
-                           (vector
-                             (let* ((length (linear-quad-length depth))
-                                    (vector (make-array length)))
-                               (dotimes (i length vector)
-                                 (setf (aref vector i) (make-space))))))))
-  (vector #() :type vector :read-only t)
-  (depth *depth* :type (integer 0 15) :read-only t))
+(defclass lqtree ()
+  ((w :initarg :w :type (integer 0 *) :reader w)
+   (h :initarg :h :type (integer 0 *) :reader h)
+   (vector :reader lqtree-vector :type vector)
+   (depth :initarg :depth :type (integer 0 15) :reader lqtree-depth))
+  (:default-initargs :depth *depth*)
+  (:documentation "Linear Quad Tree."))
 
-(defmethod print-object ((o lqtree) stream)
-  (print-unreadable-object (o stream :type t)))
+(defmethod initialize-instance :after ((o lqtree) &key depth)
+  (setf (slot-value o 'vector)
+          (let* ((length (linear-quad-length depth))
+                 (vector (make-array length)))
+            (dotimes (i length vector) (setf (aref vector i) (make-space))))))
 
-(defun space (lqtree x y w h max-w max-h &optional (*depth* *depth*))
-  (aref (lqtree-vector lqtree) (linear-index x y w h max-w max-h *depth*)))
+(defun space (lqtree x y w h &optional (*depth* *depth*))
+  (aref (lqtree-vector lqtree)
+        (linear-index x y w h (w lqtree) (h lqtree) *depth*)))
 
-(defun (setf space)
-       (new lqtree x y w h max-w max-h &optional (*depth* *depth*))
-  (store new (space lqtree x y w h max-w max-h *depth*)))
+(defun (setf space) (new lqtree x y w h &optional (*depth* *depth*))
+  (store new (space lqtree x y w h *depth*)))
 
 (defun traverse (lqtree call-back)
   (labels ((rec (index &optional seen)
@@ -279,11 +280,12 @@
 (defun delete (storable lqtree)
   (delete-from-space storable (aref (lqtree-vector lqtree) (index storable))))
 
-(defun move (storable x y max-w max-h lqtree)
+(defun move (storable x y lqtree)
   (setf (x (rect storable)) x
         (y (rect storable)) y)
   (let ((new-space
-         (linear-index x y (w storable) (h storable) max-w max-h *depth*)))
+         (linear-index x y (w storable) (h storable) (w lqtree) (h lqtree)
+                       *depth*)))
     (if (= new-space (index storable))
         storable
         (progn
