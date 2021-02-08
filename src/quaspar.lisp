@@ -218,6 +218,7 @@
     (rec 0)))
 
 (defmacro do-lqtree ((var lqtree) &body body)
+  "Iterate over every objects in lqtree."
   (let ((cell (gensym "CELL")))
     `(loop :for ,cell :across (lqtree-vector ,lqtree)
            :for ,var = (cell-content ,cell)
