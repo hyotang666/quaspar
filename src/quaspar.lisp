@@ -90,43 +90,34 @@
          (depth (depth left-top right-bottom)))
     (+ (/ (1- (expt 4 depth)) *depth*) (space-local-index left-top depth))))
 
-;;;; DOUBLE-LINKED-LIST
+;;;; LQTREE-STORABLE
 
-(defstruct dcons prev next content)
+(defclass lqtree-storable ()
+  ((index :initarg :index :accessor index :documentation "Morton space index")
+   (prev :initform nil :initarg :prev :accessor prev
+         ;; NIL means top of the list.
+         :type (or null lqtree-storable)
+         :documentation "Previous object of the list.")
+   (next :initform nil :initarg :next :accessor next
+         ;; NIL means last of the list.
+         :type (or null lqtree-storable)
+         :documentation "Next object of the list."))
+  (:default-initargs :x 0 :y 0 :w 0 :h 0 :depth *depth*)
+  (:documentation "Inherit this to store object for lqtree."))
 
-(defmethod print-object ((o dcons) stream)
-  (print-unreadable-object (o stream :type t :identity t)
-    (pprint-logical-block (stream nil)
-      (do ((cons o (dcons-next cons)))
-          (nil)
-        (write (dcons-content cons) :stream stream)
-        (when (null (dcons-next cons))
-          (return))
-        (write-char #\Space stream)
-        (pprint-newline :fill stream)))))
+(defmethod initialize-instance :after
+           ((o lqtree-storable)
+            &key x y w h (max-w (error "MAX-W is required."))
+            (max-h (error "MAX-H is reqrured.") depth))
+  (setf (index o) (linear-index x y w h max-w max-h depth)))
 
-(defun dlist (content &rest rest-contents)
-  (do* ((first (make-dcons :content content))
-        (rest rest-contents (cdr rest))
-        (cdr first))
-       ((null rest) first)
-    (setf cdr
-            (let ((dcons (make-dcons :prev cdr :content (car rest))))
-              (setf (dcons-next cdr) dcons)
-              dcons))))
+(defun delete (storable) (setf (next (prev storable)) (next storable)) t)
 
-(defun delete (dcons)
-  (setf (dcons-next (dcons-prev dcons)) (dcons-next dcons))
-  t)
-
-(defmacro do-dlist ((var dlist) &body body)
-  (let ((v (gensym "DLIST")))
-    `(do* ((,v ,dlist (dcons-next ,v))
-           (,var (dcons-content ,v) (dcons-content ,v)))
-          (nil)
-      ,@body
-       (when (null (dcons-next ,v))
-         (return)))))
+(defun add-stroable (a b)
+  (setf (next b) a
+        (prev a) b
+        (index a) (index b))
+  nil)
 
 ;;;; LQTREE
 
