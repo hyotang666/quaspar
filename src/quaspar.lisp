@@ -207,6 +207,12 @@
 (defmethod print-object ((o lqtree) stream)
   (print-unreadable-object (o stream :type t)))
 
+(defun cell (lqtree x y w h max-w max-h &optional (*depth* *depth*))
+  (aref lqtree (linear-index x y w h max-w max-h *depth*)))
+
+(defun (setf cell) (new lqtree x y w h max-w max-h &optional (*depth* *depth*))
+  (store new (cell lqtree x y w h max-w max-h *depth*)))
+
 (defun traverse (lqtree call-back)
   (labels ((rec (index &optional seen)
              (when (array-in-bounds-p lqtree index)
@@ -224,9 +230,3 @@
            :for ,var = (cell-content ,cell)
            :do (progn ,@body))))
 
-(defun ref (lqtree x y w h max-w max-h)
-  (aref (lqtree-vector lqtree) (morton-space-index x y w h max-w max-h)))
-
-(defun (setf ref) (new lqtree x y w h max-w max-h)
-  (setf (aref (lqtree-vector lqtree) (morton-space-index x y w h max-w max-h))
-          new))
