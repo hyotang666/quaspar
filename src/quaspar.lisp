@@ -188,8 +188,8 @@
             (next (cell-last cell)) storable
             (cell-last cell) storable)))
 
-(defmacro do-stored ((var storable) &body body)
-  `(do ((,var ,storable (next ,var)))
+(defmacro do-stored ((var cell) &body body)
+  `(do ((,var (cell-content ,cell) (next ,var)))
        (nil)
     ,@body
      (when (null (next ,var))
