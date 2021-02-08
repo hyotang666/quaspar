@@ -6,7 +6,6 @@
   (:export ;;; Condition
            #:out-of-space
            ;;; Special vars
-           #:*depth*
            #:*rect-constructor*
            ;;; LQTREE
            #:lqtree ; type-name
@@ -54,31 +53,14 @@
              (cell-error-name condition) (point condition) (range condition)
              (+ (point condition) (range condition)) (max-of condition)))))
 
-;;;; MORTON-ORDER-SPACES
-
-(defparameter *depth* 4)
-
-;; Currently supported *DEPTH* is declaimed below.
-;; This is depends on BIT-SEPARATE algorithm.
-
-(declaim
- (type
-  (integer 0 15
-   #+(or) ; How to compute above max value is.
-   (loop :for i :upfrom 0
-         :if (< #xFFFFFFFF ; <--- (unsigned-byte 32)
-                (linear-quad-length i))
-           :return (1- i)))
-  *depth*))
-
 (declaim
  (ftype (function
-         ((integer 0 *) (integer 0 *) (integer 0 *) (integer 0 *) &optional
+         ((integer 0 *) (integer 0 *) (integer 0 *) (integer 0 *)
           (integer 0 *))
          (values (integer 0 *) (integer 0 *) &optional))
         morton-cord))
 
-(defun morton-cord (x y max-w max-h &optional (depth *depth*))
+(defun morton-cord (x y max-w max-h depth)
   "Convert cordinates to morton spaces cordinates."
   (let ((expt (expt 2 depth)))
     (values (floor x (/ (float max-w) expt)) (floor y (/ (float max-h) expt)))))
@@ -114,7 +96,7 @@
   "Compute linear index of an ocupied local space."
   (ash left-top (- (* 2 ocupied-space-depth))))
 
-(defun linear-index (x y w h max-w max-h &optional (*depth* *depth*))
+(defun linear-index (x y w h max-w max-h depth)
   "Compute index of background linear quad tree's vector."
   (assert (< 0 (+ x w) max-w) ()
     'out-of-space :name 'x
@@ -128,12 +110,13 @@
                   :max max-h)
   (let* ((left-top
           (multiple-value-call #'smallest-space-index
-            (morton-cord x y max-w max-h *depth*)))
+            (morton-cord x y max-w max-h depth)))
          (right-bottom
           (multiple-value-call #'smallest-space-index
-            (morton-cord (+ x w) (+ y h) max-w max-h *depth*)))
-         (depth (depth left-top right-bottom)))
-    (+ (/ (1- (expt 4 depth)) *depth*) (space-local-index left-top depth))))
+            (morton-cord (+ x w) (+ y h) max-w max-h depth)))
+         (space-depth (depth left-top right-bottom)))
+    (+ (/ (1- (expt 4 space-depth)) depth)
+       (space-local-index left-top space-depth))))
 
 ;;;; RECT
 ;; In order to update cordinates at once, we needs RECT object.
@@ -183,7 +166,7 @@
          ;; NIL means last of the list.
          :type (or null lqtree-storable)
          :documentation "Next object of the list."))
-  (:default-initargs :x 0 :y 0 :w 0 :h 0 :depth *depth*)
+  (:default-initargs :x 0 :y 0 :w 0 :h 0 :depth 4)
   (:documentation "Inherit this to store object for lqtree."))
 
 (defmethod initialize-instance
@@ -239,8 +222,16 @@
   ((w :initarg :w :type (integer 0 *) :reader w)
    (h :initarg :h :type (integer 0 *) :reader h)
    (vector :reader lqtree-vector :type vector)
+   ;; Currently supported  is declaimed below.
+   ;; This is depends on BIT-SEPARATE algorithm.
+   #+(or) ; How to compute above max value is.
+   (loop :for i
+         :upfrom 0
+         :if (< #xFFFFFFFF ; <--- (unsigned-byte 32)
+                (linear-quad-length i))
+         :return (1- i))
    (depth :initarg :depth :type (integer 0 15) :reader lqtree-depth))
-  (:default-initargs :depth *depth*)
+  (:default-initargs :depth 4)
   (:documentation "Linear Quad Tree."))
 
 (defmethod initialize-instance :after ((o lqtree) &key depth)
@@ -249,12 +240,11 @@
                  (vector (make-array length)))
             (dotimes (i length vector) (setf (aref vector i) (make-space))))))
 
-(defun space (lqtree x y w h &optional (*depth* *depth*))
+(defun space (lqtree x y w h)
   (aref (lqtree-vector lqtree)
-        (linear-index x y w h (w lqtree) (h lqtree) *depth*)))
+        (linear-index x y w h (w lqtree) (h lqtree) (lqtree-depth lqtree))))
 
-(defun (setf space) (new lqtree x y w h &optional (*depth* *depth*))
-  (store new (space lqtree x y w h *depth*)))
+(defun (setf space) (new lqtree x y w h) (store new (space lqtree x y w h)))
 
 (defun traverse (lqtree call-back)
   (labels ((rec (index &optional seen)
@@ -285,7 +275,7 @@
         (y (rect storable)) y)
   (let ((new-space
          (linear-index x y (w storable) (h storable) (w lqtree) (h lqtree)
-                       *depth*)))
+                       (lqtree-depth lqtree))))
     (if (= new-space (index storable))
         storable
         (progn
