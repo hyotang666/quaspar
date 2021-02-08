@@ -188,6 +188,13 @@
             (next (cell-last cell)) storable
             (cell-last cell) storable)))
 
+(defmacro do-stored ((var storable) &body body)
+  `(do ((,var ,storable (next ,var)))
+       (nil)
+    ,@body
+     (when (null (next ,var))
+       (return))))
+
 ;;;; LQTREE
 
 (defun linear-quad-length (depth)
