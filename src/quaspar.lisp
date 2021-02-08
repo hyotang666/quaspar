@@ -129,6 +129,7 @@
 
 (defclass lqtree-storable ()
   ((index :initarg :index :accessor index :documentation "Morton space index")
+   (rect :initarg :rect :reader rect)
    (prev :initform nil :initarg :prev :accessor prev
          ;; NIL means top of the list.
          :type (or null lqtree-storable)
@@ -140,11 +141,15 @@
   (:default-initargs :x 0 :y 0 :w 0 :h 0 :depth *depth*)
   (:documentation "Inherit this to store object for lqtree."))
 
-(defmethod initialize-instance :after
+(defmethod initialize-instance
            ((o lqtree-storable)
+            &rest args
             &key x y w h (max-w (error "MAX-W is required."))
-            (max-h (error "MAX-H is reqrured.") depth))
-  (setf (index o) (linear-index x y w h max-w max-h depth)))
+            (max-h (error "MAX-H is reqrured.")) depth index rect)
+  (multiple-value-call #'call-next-method
+    (values :index (or index (linear-index x y w h max-w max-h depth)))
+    (values :rect (or rect (funcall *rect-constructor* :x x :y y :w w :h h)))
+    (values-list args)))
 
 (defun delete (storable) (setf (next (prev storable)) (next storable)) t)
 
