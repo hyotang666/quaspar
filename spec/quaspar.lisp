@@ -242,3 +242,34 @@
 
 ;;;; Notes:
 
+(requirements-about MAKE-RECT :doc-type function)
+
+;;;; Description:
+; The default rect-constructor for LQTREE-STORABLE make-instance &key parameter :rect-constructor.  
+
+#+syntax (MAKE-RECT &key (x 0) (y 0) (w 0) (h 0)) ; => result
+
+#?(make-rect) :be-the rect
+
+;;;; Arguments and Values:
+
+; x := unsigned-byte
+
+; y := unsigned-byte
+
+; w := unsigned-byte
+
+; h := unsigned-byte
+
+; result := rect
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; none
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+

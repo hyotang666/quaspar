@@ -130,6 +130,13 @@
   (print-unreadable-object (o stream :type t)
     (format stream "x ~S y ~S w ~S h ~S" (x o) (y o) (w o) (h o))))
 
+(declaim
+ (ftype (function
+         (&key (:x (integer 0 *)) (:y (integer 0 *)) (:w (integer 0 *))
+          (:h (integer 0 *)))
+         (values rect &optional))
+        make-rect))
+
 (defun make-rect (&key (x 0) (y 0) (w 0) (h 0))
   (make-instance 'rect :x x :y y :w w :h h))
 
