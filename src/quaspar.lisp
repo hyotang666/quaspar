@@ -96,12 +96,12 @@
 
 (defun linear-index (x y w h max-w max-h depth)
   "Compute index of background linear quad tree's vector."
-  (assert (< 0 (+ x w) max-w) ()
+  (assert (< -1 (+ x w) max-w) ()
     'out-of-space :name 'x
                   :point x
                   :range w
                   :max max-w)
-  (assert (< 0 (+ y h) max-h) ()
+  (assert (< -1 (+ y h) max-h) ()
     'out-of-space :name 'y
                   :point y
                   :range h
@@ -176,11 +176,11 @@
            ((o lqtree-storable)
             &rest args
             &key x y w h (max-w (error "MAX-W is required."))
-            (max-h (error "MAX-H is reqrured.")) depth index rect
-            rect-constructor)
+            (max-h (error "MAX-H is reqrured.")) depth rect-constructor)
   (multiple-value-call #'call-next-method
-    (values :index (or index (linear-index x y w h max-w max-h depth)))
-    (values :rect (or rect (funcall rect-constructor :x x :y y :w w :h h)))
+    o
+    (values :index (linear-index x y w h max-w max-h depth))
+    (values :rect (funcall rect-constructor :x x :y y :w w :h h))
     (values-list args)))
 
 (defun delete-from-space (storable space)

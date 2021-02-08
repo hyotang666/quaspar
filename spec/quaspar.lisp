@@ -273,3 +273,29 @@
 
 ;;;; Exceptional-Situations:
 
+(requirements-about LQTREE-STORABLE :doc-type TYPE)
+
+;;;; Description:
+; Inherit this to store object for lqtree.
+;;;; Class Precedence List: (case in SBCL)
+; lqtree-storable standard-object slot-object t
+
+;;;; Effective Slots:
+
+; INDEX [Type] T
+; [ACCESSOR] index
+; Morton space index
+
+; RECT [Type] T
+; [READER] rect
+
+; PREV [Type] (OR NULL LQTREE-STORABLE)
+; [ACCESSOR] prev
+; Previous object of the list.
+
+; NEXT [Type] (OR NULL LQTREE-STORABLE)
+; [ACCESSOR] next
+; Next object of the list.
+
+;;;; Notes:
+; To constract it, you must specify MAX-W and MAX-H as keyword parameter for MAKE-INSTANCE.
