@@ -3,7 +3,41 @@
 (defpackage :quaspar
   (:shadow delete space)
   (:use :cl)
-  (:export))
+  (:export ;;; Condition
+           #:out-of-space
+           ;;; Special vars
+           #:*depth*
+           #:*rect-constructor*
+           ;;; LQTREE
+           #:lqtree ; type-name
+           #:make-lqtree ; constructor
+           #:space ; node accessor
+           #:delete
+           #:move
+           #:do-lqtree ; iterate macro.
+           #:traverse ; interate function.
+           ;;; RECT
+           #:rect ; class
+           #:make-rect ; constructor
+           ;; Slot-accessors
+           #:x
+           #:y
+           #:w
+           #:h
+           ;;; LQTREE-STORABLE
+           #:lqtree-storable ; class
+           #| #:rect ; reader |#
+           ;;; Underlying functions for heavy user.
+           #:prev ; accessor
+           #:next ; accessor
+           #:index ; accessor
+           #:linear-index
+           #:delete-from-space
+           #:store
+           #:do-stored ; iterate macro.
+           #:lqtree-vector ; reader
+           #:lqtree-depth ; reader
+           ))
 
 (in-package :quaspar)
 
