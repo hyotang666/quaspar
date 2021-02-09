@@ -52,10 +52,23 @@
              (cell-error-name condition) (point condition) (range condition)
              (+ (point condition) (range condition)) (max-of condition)))))
 
+(defun linear-quad-length (depth)
+  (loop :for i :upto depth
+        :sum (expt 4 i)))
+
+(deftype depth ()
+  ;; Currently supported depth is below.
+  ;; This is depends on BIT-SEPARATE algorithm.
+  #+(or) ; How to compute above max value is.
+  (loop :for i :upfrom 0
+        :if (< #xFFFFFFFF ; <--- (unsigned-byte 32)
+               (linear-quad-length i))
+          :return (1- i))
+  '(integer 0 15))
+
 (declaim
  (ftype (function
-         ((integer 0 *) (integer 0 *) (integer 0 *) (integer 0 *)
-          (integer 0 *))
+         ((integer 0 *) (integer 0 *) (integer 0 *) (integer 0 *) depth)
          (values (integer 0 *) (integer 0 *) &optional))
         morton-cord))
 
@@ -232,20 +245,6 @@
          ,@body))))
 
 ;;;; LQTREE
-
-(defun linear-quad-length (depth)
-  (loop :for i :upto depth
-        :sum (expt 4 i)))
-
-(deftype depth ()
-  ;; Currently supported depth is below.
-  ;; This is depends on BIT-SEPARATE algorithm.
-  #+(or) ; How to compute above max value is.
-  (loop :for i :upfrom 0
-        :if (< #xFFFFFFFF ; <--- (unsigned-byte 32)
-               (linear-quad-length i))
-          :return (1- i))
-  '(integer 0 15))
 
 (defclass lqtree ()
   ((w :initarg :w
