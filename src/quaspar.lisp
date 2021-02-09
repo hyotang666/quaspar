@@ -32,6 +32,7 @@
            #:delete-from-space
            #:store
            #:do-stored ; iterate macro.
+           #:do-unique-pair ; iterate macro.
            #:lqtree-vector ; reader
            #:lqtree-depth ; reader
            ))

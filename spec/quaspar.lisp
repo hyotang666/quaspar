@@ -482,3 +482,42 @@
 
 ;;;; Exceptional-Situations:
 
+(requirements-about DO-UNIQUE-PAIR :doc-type function)
+
+;;;; Description:
+; Iterate over unique pairs in the SPACE.
+
+#+syntax (DO-UNIQUE-PAIR ((a b) space) &body body) ; => result
+
+#?(let ((space (quaspar::make-space)))
+    (store (make-instance 'lqtree-storable :max-w 100 :max-h 100) space)
+    (store (make-instance 'lqtree-storable :x 1 :max-w 100 :max-h 100) space)
+    (store (make-instance 'lqtree-storable :x 2 :max-w 100 :max-h 100) space)
+    (do-unique-pair ((a b) space)
+      (format t "~A:~A~%" (x (rect a)) (x (rect b)))))
+:outputs "0:1
+0:2
+1:2
+"
+
+;;;; Arguments and Values:
+
+; a := symbol, not evaluated.
+
+; b := symbol, not evaluated.
+
+; space := Form which generates SPACE object.
+
+; body := implicit progn.
+
+; result := NULL
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; none
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
