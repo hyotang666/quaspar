@@ -73,6 +73,8 @@
      (format stream "~S is out of ~S in range ~S." (rect condition)
              (max-of condition) (cell-error-name condition)))))
 
+;;;; MORON-NUMBER-INDEX
+
 (defun linear-quad-length (depth)
   (loop :for i :upto depth
         :sum (expt 4 i)))
