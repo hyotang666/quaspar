@@ -75,9 +75,7 @@
 
 ;;;; MORON-NUMBER-INDEX
 
-(defun linear-quad-length (depth)
-  (loop :for i :upto depth
-        :sum (expt 4 i)))
+(defun linear-quad-length (depth) (/ (1- (expt 4 depth)) 3))
 
 (deftype depth ()
   ;; Currently supported depth is below.
@@ -143,7 +141,7 @@
             (multiple-value-call #'smallest-space-index
               (morton-cord vert hor max-w max-h depth)))
            (space-depth (depth left-top right-bottom)))
-      (+ (/ (1- (expt 4 (- depth space-depth 1))) 3)
+      (+ (max (linear-quad-length (- depth space-depth 1)) 0)
          (space-local-index left-top space-depth)))))
 
 ;;;; SPACE
