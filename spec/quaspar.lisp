@@ -521,3 +521,26 @@
 ;;;; Notes:
 
 ;;;; Exceptional-Situations:
+
+(requirements-about LQTREE :doc-type TYPE)
+
+;;;; Description:
+
+;;;; Effective Slots:
+
+; W [Type] (INTEGER 0 *)
+; [READER] w
+; Max width of the root space.
+
+; H [Type] (INTEGER 0 *)
+; [READER] h
+; Max height of the root space.
+
+; VECTOR [Type] VECTOR
+; [READER] lqtree-vector
+
+; DEPTH [Type] DEPTH
+; [READER] lqtree-depth
+
+;;;; Notes:
+
