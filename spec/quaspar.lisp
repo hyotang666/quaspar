@@ -432,3 +432,53 @@
 
 ;;;; Exceptional-Situations:
 
+(requirements-about DO-STORED :doc-type function)
+
+;;;; Description:
+
+#+syntax (DO-STORED (var space) &body body) ; => result
+
+;;;; Arguments and Values:
+
+; var := SYMBOL, not evaluated.
+#?(do-stored ("not-symbol" (quaspar::make-space)) :dummy)
+:signals condition
+#?(do-stored ((intern "NOT evaluated") (quaspar::make-space)) :dummy)
+:signals condition
+; Bound by lqtree-storable.
+#?(let ((space (quaspar::make-space)))
+    (store (make-instance 'lqtree-storable :max-w 100 :max-h 100) space)
+    (store (make-instance 'lqtree-storable :x 1 :max-w 100 :max-h 100) space)
+    (store (make-instance 'lqtree-storable :x 2 :max-w 100 :max-h 100) space)
+    (do-stored (v space)
+      (unless (typep v 'lqtree-storable)
+        (error "Not lqtree-storable object."))))
+=> NIL
+
+; Iterate over lqtree-storable in the space.
+#?(let ((space (quaspar::make-space)))
+    (store (make-instance 'lqtree-storable :max-w 100 :max-h 100) space)
+    (store (make-instance 'lqtree-storable :x 1 :max-w 100 :max-h 100) space)
+    (store (make-instance 'lqtree-storable :x 2 :max-w 100 :max-h 100) space)
+    (do-stored (v space)
+      (prin1 (x (rect v)))))
+:outputs "012"
+
+; space := Form which generate quaspar::space object.
+#?(do-stored (v :not-generate-space) (print v))
+:signals condition
+
+; body := implicit-progn
+
+; result := null
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; none
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
