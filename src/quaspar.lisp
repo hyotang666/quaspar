@@ -237,19 +237,27 @@
   (loop :for i :upto depth
         :sum (expt 4 i)))
 
+(deftype depth ()
+  ;; Currently supported depth is below.
+  ;; This is depends on BIT-SEPARATE algorithm.
+  #+(or) ; How to compute above max value is.
+  (loop :for i :upfrom 0
+        :if (< #xFFFFFFFF ; <--- (unsigned-byte 32)
+               (linear-quad-length i))
+          :return (1- i))
+  '(integer 0 15))
+
 (defclass lqtree ()
-  ((w :initarg :w :type (integer 0 *) :reader w)
-   (h :initarg :h :type (integer 0 *) :reader h)
+  ((w :initarg :w
+      :type (integer 0 *)
+      :reader w
+      :documentation "Max width of the root space.")
+   (h :initarg :h
+      :type (integer 0 *)
+      :reader h
+      :documentation "Max height of the root space.")
    (vector :reader lqtree-vector :type vector)
-   ;; Currently supported  is declaimed below.
-   ;; This is depends on BIT-SEPARATE algorithm.
-   #+(or) ; How to compute above max value is.
-   (loop :for i
-         :upfrom 0
-         :if (< #xFFFFFFFF ; <--- (unsigned-byte 32)
-                (linear-quad-length i))
-         :return (1- i))
-   (depth :initarg :depth :type (integer 0 15) :reader lqtree-depth))
+   (depth :initarg :depth :type depth :reader lqtree-depth))
   (:default-initargs :depth 4)
   (:documentation "Linear Quad Tree."))
 
@@ -258,6 +266,13 @@
           (let* ((length (linear-quad-length depth))
                  (vector (make-array length)))
             (dotimes (i length vector) (setf (aref vector i) (make-space))))))
+
+(declaim
+ (ftype (function ((integer 0 *) (integer 0 *) depth)
+         (values lqtree &optional))
+        make-lqtree))
+
+(defun make-lqtree (w h d) (make-instance 'lqtree :w w :h h :depth d))
 
 (defun space (lqtree x y w h)
   (aref (lqtree-vector lqtree)

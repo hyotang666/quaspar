@@ -2,7 +2,7 @@
 (in-package :asdf)
 (defsystem "quaspar"
   :version
-  "4.0.0"
+  "4.1.0"
   :depends-on
   nil
   :pathname
