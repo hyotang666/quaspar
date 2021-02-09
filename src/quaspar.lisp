@@ -201,6 +201,10 @@
                 (space-last space) nil)))
   (values))
 
+(declaim
+ (ftype (function (lqtree-storable space) (values lqtree-storable &optional))
+        store))
+
 (defun store (storable space)
   (if (empty-space-p space)
       (setf (space-contents space) storable

@@ -299,3 +299,64 @@
 
 ;;;; Notes:
 ; To constract it, you must specify MAX-W and MAX-H as keyword parameter for MAKE-INSTANCE.
+
+(requirements-about STORE :doc-type function)
+
+;;;; Description:
+; Store lqtree-storable object to internal space data object.
+
+#+syntax (STORE storable space) ; => result
+
+#?(store (make-instance 'lqtree-storable :max-w 100 :max-h 100)
+         (quaspar::make-space))
+:satisfies (lambda (o)
+             (& (typep o 'lqtree-storable)
+                (= 0 (index o))
+                (typep (rect o) 'rect)
+                (= 0 (x (rect o)))
+                (= 0 (y (rect o)))
+                (= 0 (w (rect o)))
+                (= 0 (h (rect o)))
+                (null (next o))
+                (null (prev o))))
+
+; Stored object is pushed last.
+; Objects are linked.
+#?(let ((space (quaspar::make-space)))
+    (store (make-instance 'lqtree-storable :max-w 100 :max-h 100)
+           space)
+    (store (make-instance 'lqtree-storable :x 1 :max-w 100 :max-h 100)
+           space)
+    space)
+:satisfies (lambda (o)
+             (& (typep o 'quaspar::space)
+                (typep (quaspar::space-contents o) 'lqtree-storable)
+                (null (prev (quaspar::space-contents o)))
+                (typep (next (quaspar::space-contents o)) 'lqtree-storable)
+                (eq (prev (next (quaspar::space-contents o)))
+                    (quaspar::space-contents o))
+                (null (next (next (quaspar::space-contents o))))
+                (= 0 (x (rect (quaspar::space-contents o))))
+                (= 1 (x (rect (next (quaspar::space-contents o)))))))
+
+;;;; Arguments and Values:
+
+; storable := lqtree-storable, otherwise signals condition depends on implementation.
+#?(store :not-storable-object (quaspar::make-space)) :signals condition
+
+; space := (or (cons null null) (cons lqtree-storable lqtree-storable))
+; This internal object is automatically constructed by LQTREE.
+
+; result := lqtree-storable
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; Modify storable object and space object.
+
+;;;; Notes:
+; STORE just do storing, never care anything else.
+
+;;;; Exceptional-Situations:
+
