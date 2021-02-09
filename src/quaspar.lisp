@@ -143,7 +143,7 @@
             (multiple-value-call #'smallest-space-index
               (morton-cord vert hor max-w max-h depth)))
            (space-depth (depth left-top right-bottom)))
-      (+ (/ (1- (expt 4 space-depth)) depth)
+      (+ (/ (1- (expt 4 (- depth space-depth 1))) 3)
          (space-local-index left-top space-depth)))))
 
 ;;;; SPACE
