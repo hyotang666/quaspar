@@ -218,7 +218,7 @@
             (space-last space) storable)))
 
 (defmacro do-stored ((var space) &body body)
-  `(do ((,var (space-contents ,space) (next ,var)))
+  `(do ((,var (space-contents (the space ,space)) (next ,var)))
        (nil)
     ,@body
      (when (null (next ,var))
