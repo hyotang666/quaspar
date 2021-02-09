@@ -144,7 +144,7 @@
 
 (deftype space () '(or (cons null null) (cons lqtree-storable lqtree-storable)))
 
-(defun make-space () (list nil))
+(defun make-space (&optional first-content) (cons first-content first-content))
 
 (defun empty-space-p (space) (null (car space)))
 
@@ -223,6 +223,12 @@
     ,@body
      (when (null (next ,var))
        (return))))
+
+(defmacro do-unique-pair (((a b) space) &body body)
+  `(do-stored (,a ,space)
+     (when (next ,a)
+       (do-stored (,b (make-space (next ,a)))
+         ,@body))))
 
 ;;;; LQTREE
 
