@@ -544,3 +544,29 @@
 
 ;;;; Notes:
 
+(requirements-about MAKE-LQTREE :doc-type function)
+
+;;;; Description:
+
+#+syntax (MAKE-LQTREE w h d) ; => result
+
+;;;; Arguments and Values:
+
+; w := unsigned-byte
+
+; h := unsigned-byte
+
+; d := (unsigned-byte 4)
+
+; result := lqtree
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; none
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
