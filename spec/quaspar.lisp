@@ -360,3 +360,75 @@
 
 ;;;; Exceptional-Situations:
 
+(requirements-about DELETE-FROM-SPACE :doc-type function
+                    :around (let ((space (quaspar::make-space))
+                                  first between last)
+                              (declare (ignorable first between last))
+                              (store (setf first (make-instance 'lqtree-storable :max-w 100 :max-h 100))
+                                     space)
+                              (store (setf between (make-instance 'lqtree-storable :x 1 :max-w 100 :max-h 100))
+                                     space)
+                              (store (setf last (make-instance 'lqtree-storable :x 2 :max-w 100 :max-h 100))
+                                     space)
+                              (call-body)))
+
+;;;; Description:
+
+#+syntax (DELETE-FROM-SPACE storable space) ; => result
+
+; Case first.
+#?(progn (delete-from-space first space)
+         space)
+:satisfies (lambda (o)
+             (& (typep o 'quaspar::space)
+                (= 1 (x (rect (quaspar::space-contents o))))
+                (null (prev (quaspar::space-contents o)))
+                (= 2 (x (rect (next (quaspar::space-contents o)))))))
+
+; Case betwee.
+#?(progn (delete-from-space between space)
+         space)
+:satisfies (lambda (o)
+             (& (typep o 'quaspar::space)
+                (= 0 (x (rect (quaspar::space-contents o))))
+                (= 2 (x (rect (next (quaspar::space-contents o)))))
+                (= 0 (x (rect (prev (next (quaspar::space-contents o))))))))
+
+; Case last
+#?(progn (delete-from-space last space)
+         space)
+:satisfies (lambda (o)
+             (& (typep o 'quaspar::space)
+                (= 0 (x (rect (quaspar::space-contents o))))
+                (= 1 (x (rect (next (quaspar::space-contents o)))))
+                (null (next (next (quaspar::space-contents o))))
+                (eq (quaspar::space-last o)
+                    (next (quaspar::space-contents o)))))
+
+; Case only one element.
+#?(let ((space (quaspar::make-space)) a)
+    (store (setf a (make-instance 'lqtree-storable :max-w 10 :max-h 10)) space)
+    (delete-from-space a space)
+    space)
+:satisfies (lambda (o)
+             (& (typep o 'space)
+                (equal o '(nil . nil))))
+;;;; Arguments and Values:
+
+; storable := lqtree-storable
+
+; space := (or (cons null null) (cons lqtree-storable lqtree-storable))
+
+; result := (values)
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; Modify object in the SPACE.
+
+;;;; Notes:
+; STORABLE is not modified.
+
+;;;; Exceptional-Situations:
+

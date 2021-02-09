@@ -183,6 +183,10 @@
     (values :rect (funcall rect-constructor :x x :y y :w w :h h))
     (values-list args)))
 
+(declaim
+ (ftype (function (lqtree-storable space) (values &optional))
+        delete-from-space))
+
 (defun delete-from-space (storable space)
   (if (prev storable)
       (if (next storable)
