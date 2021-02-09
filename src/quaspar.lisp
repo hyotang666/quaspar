@@ -39,18 +39,39 @@
 
 (in-package :quaspar)
 
+;;;; RECT
+;; In order to update cordinates at once, we needs RECT object.
+
+(defclass rect ()
+  ((x :initarg :x :initform 0 :accessor x :type (integer 0 *))
+   (y :initarg :y :initform 0 :accessor y :type (integer 0 *))
+   (w :initarg :w :initform 0 :reader w :type (integer 0 *))
+   (h :initarg :h :initform 0 :reader h :type (integer 0 *)))
+  (:documentation "The default rect object for LQTREE-STORABLE."))
+
+(defmethod print-object ((o rect) stream)
+  (print-unreadable-object (o stream :type t)
+    (format stream "x ~S y ~S w ~S h ~S" (x o) (y o) (w o) (h o))))
+
+(declaim
+ (ftype (function
+         (&key (:x (integer 0 *)) (:y (integer 0 *)) (:w (integer 0 *))
+          (:h (integer 0 *)))
+         (values rect &optional))
+        make-rect))
+
+(defun make-rect (&key (x 0) (y 0) (w 0) (h 0))
+  (make-instance 'rect :x x :y y :w w :h h))
+
 ;;;; CONDITION
 
 (define-condition out-of-space (cell-error)
-  ((point :initarg :point :reader point)
-   (range :initarg :range :reader range)
+  ((rect :initarg :rect :reader rect)
    (max :initarg :max :reader max-of))
   (:report
    (lambda (condition stream)
-     (format stream
-             "Out of range ~A: Point ~S + Range ~S = ~S must smaller than ~S."
-             (cell-error-name condition) (point condition) (range condition)
-             (+ (point condition) (range condition)) (max-of condition)))))
+     (format stream "~S is out of ~S in range ~S." (rect condition)
+             (max-of condition) (cell-error-name condition)))))
 
 (defun linear-quad-length (depth)
   (loop :for i :upto depth
@@ -108,51 +129,20 @@
   "Compute linear index of an ocupied local space."
   (ash left-top (- (* 2 ocupied-space-depth))))
 
-(defun linear-index (x y w h max-w max-h depth)
+(defun linear-index (rect max-w max-h depth)
   "Compute index of background linear quad tree's vector."
-  (assert (< -1 (+ x w) max-w) ()
-    'out-of-space :name 'x
-                  :point x
-                  :range w
-                  :max max-w)
-  (assert (< -1 (+ y h) max-h) ()
-    'out-of-space :name 'y
-                  :point y
-                  :range h
-                  :max max-h)
-  (let* ((left-top
-          (multiple-value-call #'smallest-space-index
-            (morton-cord x y max-w max-h depth)))
-         (right-bottom
-          (multiple-value-call #'smallest-space-index
-            (morton-cord (+ x w) (+ y h) max-w max-h depth)))
-         (space-depth (depth left-top right-bottom)))
-    (+ (/ (1- (expt 4 space-depth)) depth)
-       (space-local-index left-top space-depth))))
-
-;;;; RECT
-;; In order to update cordinates at once, we needs RECT object.
-
-(defclass rect ()
-  ((x :initarg :x :initform 0 :accessor x :type (integer 0 *))
-   (y :initarg :y :initform 0 :accessor y :type (integer 0 *))
-   (w :initarg :w :initform 0 :reader w :type (integer 0 *))
-   (h :initarg :h :initform 0 :reader h :type (integer 0 *)))
-  (:documentation "The default rect object for LQTREE-STORABLE."))
-
-(defmethod print-object ((o rect) stream)
-  (print-unreadable-object (o stream :type t)
-    (format stream "x ~S y ~S w ~S h ~S" (x o) (y o) (w o) (h o))))
-
-(declaim
- (ftype (function
-         (&key (:x (integer 0 *)) (:y (integer 0 *)) (:w (integer 0 *))
-          (:h (integer 0 *)))
-         (values rect &optional))
-        make-rect))
-
-(defun make-rect (&key (x 0) (y 0) (w 0) (h 0))
-  (make-instance 'rect :x x :y y :w w :h h))
+  (let ((vert (+ (x rect) (w rect))) (hor (+ (y rect) (h rect))))
+    (assert (< -1 vert max-w) () 'out-of-space :name 'x :rect rect :max max-w)
+    (assert (< -1 hor max-h) () 'out-of-space :name 'y :rect rect :max max-h)
+    (let* ((left-top
+            (multiple-value-call #'smallest-space-index
+              (morton-cord (x rect) (y rect) max-w max-h depth)))
+           (right-bottom
+            (multiple-value-call #'smallest-space-index
+              (morton-cord vert hor max-w max-h depth)))
+           (space-depth (depth left-top right-bottom)))
+      (+ (/ (1- (expt 4 space-depth)) depth)
+         (space-local-index left-top space-depth)))))
 
 ;;;; SPACE
 
@@ -191,11 +181,9 @@
             &rest args
             &key x y w h (max-w (error "MAX-W is required."))
             (max-h (error "MAX-H is reqrured.")) depth rect-constructor)
-  (multiple-value-call #'call-next-method
-    o
-    (values :index (linear-index x y w h max-w max-h depth))
-    (values :rect (funcall rect-constructor :x x :y y :w w :h h))
-    (values-list args)))
+  (let ((rect (funcall rect-constructor :x x :y y :w w :h h)))
+    (apply #'call-next-method o :index (linear-index rect max-w max-h depth)
+           :rect rect args)))
 
 (declaim
  (ftype (function (lqtree-storable space) (values &optional))
@@ -273,11 +261,9 @@
 
 (defun make-lqtree (w h d) (make-instance 'lqtree :w w :h h :depth d))
 
-(defun space (lqtree x y w h)
+(defun space (rect lqtree)
   (aref (lqtree-vector lqtree)
-        (linear-index x y w h (w lqtree) (h lqtree) (lqtree-depth lqtree))))
-
-(defun (setf space) (new lqtree x y w h) (store new (space lqtree x y w h)))
+        (linear-index rect (w lqtree) (h lqtree) (lqtree-depth lqtree))))
 
 (defun traverse (lqtree call-back)
   (labels ((rec (index &optional seen)
@@ -307,7 +293,7 @@
   (setf (x (rect storable)) x
         (y (rect storable)) y)
   (let ((new-space
-         (linear-index x y (w storable) (h storable) (w lqtree) (h lqtree)
+         (linear-index (rect storable) (w lqtree) (h lqtree)
                        (lqtree-depth lqtree))))
     (if (= new-space (index storable))
         storable

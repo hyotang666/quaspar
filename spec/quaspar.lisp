@@ -199,17 +199,11 @@
 (requirements-about OUT-OF-SPACE :doc-type TYPE)
 
 ;;;; Description:
-; Signaled when RECT over LQTREE max range.
-;;;; Class Precedence List: (case in SBCL)
-; out-of-space cell-error error serious-condition condition slot-object t
 
 ;;;; Effective Slots:
 
-; POINT [Type] T
-; [READER] point
-
-; RANGE [Type] T
-; [READER] range
+; RECT [Type] T
+; [READER] rect
 
 ; MAX [Type] T
 ; [READER] max-of
