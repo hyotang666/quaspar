@@ -544,11 +544,14 @@
 
 #+syntax (MAKE-LQTREE w h d) ; => result
 
+#?(make-lqtree 10 10 3) :be-the lqtree
 ;;;; Arguments and Values:
 
 ; w := unsigned-byte
+; Max-width of the tree's root space.
 
 ; h := unsigned-byte
+; Max-height of the tree's root space.
 
 ; d := (unsigned-byte 4)
 
