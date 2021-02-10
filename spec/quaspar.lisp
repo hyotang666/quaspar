@@ -331,7 +331,7 @@
          (quaspar::make-space))
 :satisfies (lambda (o)
              (& (typep o 'lqtree-storable)
-                (= 21 (index o))
+                (= 85 (index o))
                 (typep (rect o) 'rect)
                 (= 0 (x (rect o)))
                 (= 0 (y (rect o)))
