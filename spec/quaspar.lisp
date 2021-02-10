@@ -808,3 +808,55 @@
 ;;;; Exceptional-Situations:
 ; When moved rect over the max range, out-of-space is signaled.
 #?(move first 100 100 tree) :signals out-of-space
+
+(requirements-about DO-LQTREE :doc-type function
+                    :around (let ((tree (make-lqtree 100 100 1))
+                                  first second last)
+                              (declare (ignorable first second last))
+                              (add (setf first (make-instance 'lqtree-storable
+                                                              :x 0 :y 0
+                                                              :max-w 100 :max-h 100
+                                                              :depth 1))
+                                   tree)
+                              (add (setf second (make-instance 'lqtree-storable
+                                                               :x 0 :y 1
+                                                               :max-w 100 :max-h 100
+                                                               :depth 1))
+                                   tree)
+                              (add (setf last (make-instance 'lqtree-storable
+                                                             :x 0 :y 2
+                                                             :max-w 100 :max-h 100
+                                                             :depth 1))
+                                   tree)
+                              (call-body)))
+
+
+;;;; Description:
+; Iterate over every objects in lqtree.
+
+#+syntax (DO-LQTREE (var lqtree) &body body) ; => result
+
+#?(do-lqtree (v tree)
+    (prin1 (y (rect v))))
+:outputs "012"
+
+;;;; Arguments and Values:
+
+; var := symbol
+
+; lqtree := form generates lqtree.
+
+; body := implicit progn.
+
+; result := NULL
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; none
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
