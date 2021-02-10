@@ -716,3 +716,28 @@
 
 ;;;; Exceptional-Situations:
 
+(requirements-about DELETE :doc-type function)
+
+;;;; Description:
+; Tiny wrapper for DELETE-FROM-CELL
+
+#+syntax (DELETE storable lqtree) ; => result
+
+;;;; Arguments and Values:
+
+; storable := 
+
+; lqtree := 
+
+; result := 
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; Modify LQTREE.
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
