@@ -741,3 +741,66 @@
 
 ;;;; Exceptional-Situations:
 
+(requirements-about MOVE :doc-type function
+                    :around (let ((tree (make-lqtree 100 100 1))
+                                  first second last)
+                              (declare (ignorable first second last))
+                              (add (setf first (make-instance 'lqtree-storable
+                                                              :x 0 :y 0
+                                                              :max-w 100 :max-h 100
+                                                              :depth 1))
+                                   tree)
+                              (add (setf second (make-instance 'lqtree-storable
+                                                               :x 0 :y 1
+                                                               :max-w 100 :max-h 100
+                                                               :depth 1))
+                                   tree)
+                              (add (setf last (make-instance 'lqtree-storable
+                                                             :x 0 :y 2
+                                                             :max-w 100 :max-h 100
+                                                             :depth 1))
+                                   tree)
+                              (call-body)))
+
+;;;; Description:
+
+#+syntax (MOVE storable x y lqtree) ; => result
+
+#?(progn (move first 80 80 tree)
+         (values tree first second last))
+:multiple-value-satisfies
+(lambda (tree first second last)
+  (declare (ignore last))
+  (& (typep tree 'lqtree)
+     (= 5 (length (lqtree-vector tree)))
+     ;; first is moved.
+     (eq first (quaspar::space-contents (aref (lqtree-vector tree) 4)))
+     ;; Index is changed.
+     (= 4 (index (quaspar::space-contents (aref (lqtree-vector tree) 4))))
+     ;; Now left upper space is second.
+     (eq second (quaspar::space-contents (aref (lqtree-vector tree) 1)))
+     ;; FIRST'next is set nil.
+     (null (next (quaspar::space-contents (aref (lqtree-vector tree) 4))))
+     (null (prev (quaspar::space-contents (aref (lqtree-vector tree) 1))))))
+
+;;;; Arguments and Values:
+
+; storable := 
+
+; x := 
+
+; y := 
+
+; lqtree := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+; When moved rect over the max range, out-of-space is signaled.
+#?(move first 100 100 tree) :signals out-of-space

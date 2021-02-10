@@ -321,4 +321,5 @@
         storable
         (progn
          (delete storable lqtree)
+         (setf (index storable) new-space)
          (store storable (aref (lqtree-vector lqtree) new-space))))))
