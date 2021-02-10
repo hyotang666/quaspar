@@ -654,3 +654,65 @@
 ; NOTE: Max width and height is exclusive.
 #?(space (make-rect :x 0 :y 0 :w 100 :h 2) tree)
 :signals out-of-space
+
+(requirements-about ADD :doc-type function)
+
+;;;; Description:
+
+#+syntax (ADD storable lqtree) ; => result
+
+#?(let ((tree (make-lqtree 100 100 1)))
+    (add (make-instance 'lqtree-storable :x 0 :y 0 :max-w 100 :max-h 100 :depth 1)
+         tree)
+    tree)
+:satisfies (lambda (tree)
+             (& (typep tree 'lqtree)
+                ;; Depth is specified 1.
+                (= 5 (length (lqtree-vector tree)))
+                ;; Root space is empty.
+                (quaspar::empty-space-p (aref (lqtree-vector tree) 0))
+                ;; Storable belogs left upper space, :x 0 :y 0.
+                (quaspar::space-contents (aref (lqtree-vector tree) 1))
+                ;; Currently only one element.
+                (eq (quaspar::space-contents (aref (lqtree-vector tree) 1))
+                    (quaspar::space-last (aref (lqtree-vector tree) 1)))
+                ;; Index is set.
+                (= 1 (index (quaspar::space-contents (aref (lqtree-vector tree) 1))))))
+
+; Automatically space is linked.
+#?(let ((tree (make-lqtree 100 100 1)))
+    (add (make-instance 'lqtree-storable :x 0 :y 0 :max-w 100 :max-h 100 :depth 1)
+         tree)
+    (add (make-instance 'lqtree-storable :x 0 :y 1 :max-w 100 :max-h 100 :depth 1)
+         tree)
+    tree)
+:satisfies (lambda (tree)
+             (& (typep tree 'lqtree)
+                ;; Depth is specified 1.
+                (= 5 (length (lqtree-vector tree)))
+                ;; Root space is empty.
+                (quaspar::empty-space-p (aref (lqtree-vector tree) 0))
+                ;; Storable belogs left upper space, :x 0 :y 0.
+                (quaspar::space-contents (aref (lqtree-vector tree) 1))
+                ;; Automatically linked list is managed.
+                (eq (quaspar::space-last (aref (lqtree-vector tree) 1))
+                    (next (quaspar::space-contents (aref (lqtree-vector tree) 1))))))
+
+;;;; Arguments and Values:
+
+; storable := lqtree-storable
+
+; lqtree := lqtree
+
+; result := lqtree-storable
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; Modify lqtree state.
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
