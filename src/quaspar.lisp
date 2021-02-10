@@ -238,6 +238,12 @@
            (when (null (next ,var))
              (return)))))))
 
+(defun count-stored (space)
+  (let ((sum 0))
+    (do-stored (v space)
+      (incf sum))
+    sum))
+
 (defmacro do-unique-pair (((a b) space) &body body)
   `(do-stored (,a ,space)
      (when (next ,a)
@@ -302,6 +308,24 @@
                             seen)))
                      (funcall call-back seen)
                      (rec (1+ index) seen))))))
+    (rec 0)))
+
+(defun pprint-lqtree (lqtree)
+  (labels ((rec (depth)
+             (when (<= depth (lqtree-depth lqtree))
+               (pprint-logical-block (nil nil :prefix (format nil "~A:" depth))
+                 (let ((range (expt 2 depth)))
+                   (dotimes (x range)
+                     (dotimes (y range)
+                       (write
+                         (count-stored
+                           (aref (lqtree-vector lqtree)
+                                 (+ (linear-quad-length (1- depth))
+                                    (+ (* x range) y)))))
+                       (write-char #\Space))
+                     (pprint-newline :mandatory))))
+               (terpri)
+               (rec (1+ depth)))))
     (rec 0)))
 
 (defmacro do-lqtree ((var lqtree) &body body)
