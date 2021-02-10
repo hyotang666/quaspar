@@ -76,7 +76,7 @@
 ;;;; MORON-NUMBER-INDEX
 
 (declaim
- (ftype (function ((integer 0 *)) (values (integer 1 *) &optional))
+ (ftype (function ((integer -1 *)) (values (integer 0 *) &optional))
         linear-quad-length))
 
 (defun linear-quad-length (depth) (/ (1- (expt 4 (1+ depth))) 3))
@@ -145,7 +145,7 @@
             (multiple-value-call #'smallest-space-index
               (morton-cord vert hor max-w max-h depth)))
            (space-depth (depth left-top right-bottom)))
-      (+ (max (linear-quad-length (- depth space-depth 1)) 0)
+      (+ (linear-quad-length (- depth space-depth 1))
          (space-local-index left-top space-depth)))))
 
 ;;;; SPACE
