@@ -484,6 +484,10 @@
       (prin1 (x (rect v)))))
 :outputs "012"
 
+#?(do-stored (v (quaspar::make-space))
+    (print v))
+=> NIL
+
 ; space := Form which generate quaspar::space object.
 #?(do-stored (v :not-generate-space) (print v))
 :signals condition

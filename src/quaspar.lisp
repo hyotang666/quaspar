@@ -229,11 +229,14 @@
             (space-last space) storable)))
 
 (defmacro do-stored ((var space) &body body)
-  `(do ((,var (space-contents (the space ,space)) (next ,var)))
-       (nil)
-    ,@body
-     (when (null (next ,var))
-       (return))))
+  (let ((s (gensym "SPACE")))
+    `(let ((,s (the space ,space)))
+       (unless (empty-space-p ,s)
+         (do ((,var (space-contents ,s) (next ,var)))
+             (nil)
+          ,@body
+           (when (null (next ,var))
+             (return)))))))
 
 (defmacro do-unique-pair (((a b) space) &body body)
   `(do-stored (,a ,space)
