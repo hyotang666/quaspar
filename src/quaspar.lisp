@@ -75,7 +75,11 @@
 
 ;;;; MORON-NUMBER-INDEX
 
-(defun linear-quad-length (depth) (/ (1- (expt 4 depth)) 3))
+(declaim
+ (ftype (function ((integer 0 *)) (values (integer 1 *) &optional))
+        linear-quad-length))
+
+(defun linear-quad-length (depth) (/ (1- (expt 4 (1+ depth))) 3))
 
 (deftype depth ()
   ;; Currently supported depth is below.

@@ -1,10 +1,36 @@
 (defpackage :quaspar.spec
   (:shadowing-import-from :quaspar space delete)
   (:import-from :quaspar #:morton-cord #:bit-separate #:smallest-space-index #:depth
-                #:space-local-index)
+                #:space-local-index #:linear-quad-length)
   (:use :cl :jingoh :quaspar))
 (in-package :quaspar.spec)
 (setup :quaspar)
+
+(requirements-about LINEAR-QUAD-LENGTH :doc-type function)
+
+;;;; Description:
+; Compute backend vector length.
+
+#+syntax (LINEAR-QUAD-LENGTH depth) ; => result
+
+#?(linear-quad-length 0) => 1
+#?(linear-quad-length 1) => 5
+#?(linear-quad-length 2) => 21
+;;;; Arguments and Values:
+
+; depth := (integer 0 *)
+
+; result := (integer 1 *)
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; none
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
 
 (requirements-about MORTON-CORD :doc-type function)
 
