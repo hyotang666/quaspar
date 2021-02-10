@@ -593,3 +593,64 @@
 
 ;;;; Exceptional-Situations:
 
+(requirements-about SPACE :doc-type function
+                    :around (let ((tree (make-lqtree 100 100 2)))
+                              (call-body)))
+
+;;;; Description:
+; Return SPACE object that is RECT should be in from LQTREE.
+
+#+syntax (SPACE rect lqtree) ; => result
+
+#?(space (make-rect :x 0 :y 0 :w 5 :y 5) tree) => (NIL)
+,:test equal
+; RECT is enough small, so raw vector index must be 5 in this case.
+#?(position (space (make-rect :x 0 :y 0 :w 5 :h 5) tree)
+            (lqtree-vector tree))
+=> 5
+,:test eq
+
+#?(position (space (make-rect :x 94 :y 94 :w 5 :h 5) tree)
+            (lqtree-vector tree))
+=> 20
+,:test eq
+
+; Huge rect must in the root space.
+#?(position (space (make-rect :x 0 :y 0 :w 98 :h 98) tree)
+            (lqtree-vector tree))
+=> 0
+,:test eq
+
+; Rect on the boundary belongs to the upper space.
+#?(position (space (make-rect :x 0 :y 0 :w 35 :h 2) tree)
+            (lqtree-vector tree))
+=> 1
+,:test eq
+
+; If boundary is shared by upper space, rect belongs the space which does not have the baoundary.
+#?(position (space (make-rect :x 45 :y 0 :w 10 :h 2) tree)
+            (lqtree-vector tree))
+=> 0
+,:test eq
+
+;;;; Arguments and Values:
+
+; rect := t
+
+; lqtree := lqtree
+
+; result := (or (cons null null) (cons lqtree-storable lqtree-storable))
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; none
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+; When RECT over the max range, OUT-OF-RANGE is signaled.
+; NOTE: Max width and height is exclusive.
+#?(space (make-rect :x 0 :y 0 :w 100 :h 2) tree)
+:signals out-of-space

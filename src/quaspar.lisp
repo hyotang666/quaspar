@@ -8,7 +8,7 @@
            ;;; LQTREE
            #:lqtree ; type-name
            #:make-lqtree ; constructor
-           #:space ; node accessor
+           #:space ; node reader
            #:delete
            #:move
            #:do-lqtree ; iterate macro.
@@ -265,7 +265,10 @@
 
 (defun make-lqtree (w h d) (make-instance 'lqtree :w w :h h :depth d))
 
+(declaim (ftype (function (t lqtree) (values space &optional)) space))
+
 (defun space (rect lqtree)
+  "Return SPACE object that is RECT should be in from LQTREE."
   (aref (lqtree-vector lqtree)
         (linear-index rect (w lqtree) (h lqtree) (lqtree-depth lqtree))))
 
