@@ -9,6 +9,7 @@
            #:lqtree ; type-name
            #:make-lqtree ; constructor
            #:space ; node reader
+           #:add
            #:delete
            #:move
            #:do-lqtree ; iterate macro.
@@ -271,6 +272,16 @@
   "Return SPACE object that is RECT should be in from LQTREE."
   (aref (lqtree-vector lqtree)
         (linear-index rect (w lqtree) (h lqtree) (lqtree-depth lqtree))))
+
+(declaim
+ (ftype (function (lqtree-storable lqtree) (values lqtree-storable &optional))
+        add))
+
+(defun add (storable lqtree)
+  (store storable
+         (aref (lqtree-vector lqtree)
+               (linear-index (rect storable) (w lqtree) (h lqtree)
+                             (lqtree-depth lqtree)))))
 
 (defun traverse (lqtree call-back)
   (labels ((rec (index &optional seen)
