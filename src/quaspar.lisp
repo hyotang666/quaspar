@@ -210,6 +210,10 @@
           ;; Only one storable in space.
           (setf (space-contents space) nil
                 (space-last space) nil)))
+  ;; Cleanup.
+  (setf (prev storable) nil
+        (next storable) nil)
+  (slot-makunbound storable 'index)
   (values))
 
 (declaim
