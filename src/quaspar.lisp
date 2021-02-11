@@ -249,11 +249,12 @@
       (cons stored acc)
       (list-of-stored (next stored) (cons stored acc))))
 
-(defmacro do-unique-pair (((a b) space) &body body)
-  `(do-stored (,a ,space)
-     (when (next ,a)
-       (do-stored (,b (make-space (next ,a)))
-         ,@body))))
+(defmacro do-unique-pair (((a b) list) &body body)
+  (let ((l (gensym "LIST")))
+    `(loop :for ,l :on ,list
+           :for ,a = (car ,l)
+           :do (loop :for ,b :in (cdr ,l)
+                     :do (progn ,@body)))))
 
 ;;;; LQTREE
 

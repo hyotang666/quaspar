@@ -509,20 +509,31 @@
 (requirements-about DO-UNIQUE-PAIR :doc-type function)
 
 ;;;; Description:
-; Iterate over unique pairs in the SPACE.
+; Iterate over unique pairs in the LIST.
 
-#+syntax (DO-UNIQUE-PAIR ((a b) space) &body body) ; => result
+#+syntax (DO-UNIQUE-PAIR ((a b) list) &body body) ; => result
 
-#?(let ((space (quaspar::make-space)))
-    (store (make-instance 'lqtree-storable :max-w 100 :max-h 100) space)
-    (store (make-instance 'lqtree-storable :x 1 :max-w 100 :max-h 100) space)
-    (store (make-instance 'lqtree-storable :x 2 :max-w 100 :max-h 100) space)
-    (do-unique-pair ((a b) space)
-      (format t "~A:~A~%" (x (rect a)) (x (rect b)))))
-:outputs "0:1
-0:2
-1:2
+#?(do-unique-pair ((a b) '(1 2 3 4 5))
+    (format t "~A:~A~%" a b))
+:outputs "1:2
+1:3
+1:4
+1:5
+2:3
+2:4
+2:5
+3:4
+3:5
+4:5
 "
+
+#?(do-unique-pair ((a b) '(1))
+    (print a b))
+:outputs ""
+
+#?(do-unique-pair ((a b) nil)
+    (print a b))
+:outputs ""
 
 ;;;; Arguments and Values:
 
@@ -530,7 +541,7 @@
 
 ; b := symbol, not evaluated.
 
-; space := Form which generates SPACE object.
+; space := Form which generates LIST object.
 
 ; body := implicit progn.
 
@@ -545,6 +556,10 @@
 ;;;; Notes:
 
 ;;;; Exceptional-Situations:
+; If list is dotted list, an error is signed.
+#?(do-unique-pair ((a b) '(1 2 . 3))
+    (print (list a b)))
+:signals error
 
 (requirements-about LQTREE :doc-type TYPE)
 
