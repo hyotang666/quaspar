@@ -303,12 +303,13 @@
                              (lqtree-depth lqtree)))))
 
 (defun traverse (lqtree &optional (call-back 'print))
+  "Iterate depth first manner."
   (let ((depth (lqtree-depth lqtree)) (vector (lqtree-vector lqtree)) seen)
     (labels ((stack-contents (index rest)
                (let ((space (aref vector index)))
                  (if (empty-space-p space)
                      rest
-                     (cons (space-contents space) rest))))
+                     (list-of-stored (space-contents space) rest))))
              (rec (d i seen)
                (when (<= d depth)
                  (loop :with length = (linear-quad-length (1- d))
@@ -317,12 +318,16 @@
                                  :for index
                                       = (logior (ash i 2)
                                                 (smallest-space-index w h))
-                                 :do (let ((seen
-                                            (stack-contents (+ length index)
-                                                            seen)))
-                                       (when seen
-                                         (funcall call-back seen))
-                                       (rec (1+ d) index seen)))))))
+                                 :do (let ((space
+                                            (aref vector (+ length index))))
+                                       (if (empty-space-p space)
+                                           (rec (1+ d) index seen)
+                                           (let ((seen
+                                                  (list-of-stored
+                                                    (space-contents space)
+                                                    seen)))
+                                             (funcall call-back seen)
+                                             (rec (1+ d) index seen)))))))))
       ;; Root space is special.
       (setf seen (stack-contents 0 nil))
       (when seen
