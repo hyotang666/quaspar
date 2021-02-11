@@ -875,3 +875,55 @@
 
 ;;;; Exceptional-Situations:
 
+(requirements-about TRAVERSE :doc-type function)
+
+;;;; Description:
+; Iterate depth first manner.
+
+#+syntax (TRAVERSE lqtree &optional (call-back 'print)) ; => result
+
+#?(let ((tree (make-lqtree 100 100 3))
+        first second last)
+    ;; This is stored in root space
+    (add (setf first (make-instance 'lqtree-storable
+                                    :x 0 :y 0
+                                    :w 98
+                                    :max-w 100 :max-h 100
+                                    :depth 3))
+         tree)
+    ;; This is stored the third depth (smallest) space.
+    (add (setf second (make-instance 'lqtree-storable
+                                     :x 0 :y 1
+                                     :max-w 100 :max-h 100
+                                     :depth 3))
+         tree)
+    ;; This is stored the second depth space.
+    (add (setf last (make-instance 'lqtree-storable
+                                   :x 0 :y 0
+                                   :h 15
+                                   :max-w 100 :max-h 100
+                                   :depth 3))
+         tree)
+    (traverse tree (lambda (list) (prin1 (length list)))))
+:outputs "123"
+
+;;;; Arguments and Values:
+
+; lqtree := lqtree
+
+; call-back := function as (function (list))
+; Accept list of storables which may collide each other.
+; HINT: See DO-UNIQUE-PAIR
+
+; result := NULL
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; none
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
