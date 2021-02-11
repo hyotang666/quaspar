@@ -296,19 +296,33 @@
                (linear-index (rect storable) (w lqtree) (h lqtree)
                              (lqtree-depth lqtree)))))
 
-(defun traverse (lqtree call-back)
-  (labels ((rec (index &optional seen)
-             (when (array-in-bounds-p (lqtree-vector lqtree) index)
-               (if (empty-space-p (aref (lqtree-vector lqtree) index))
-                   (rec (1+ index))
-                   (let ((seen
-                          (cons
-                            (space-contents
-                              (aref (lqtree-vector lqtree) index))
-                            seen)))
-                     (funcall call-back seen)
-                     (rec (1+ index) seen))))))
-    (rec 0)))
+(defun traverse (lqtree &optional (call-back 'print))
+  (let ((depth (lqtree-depth lqtree)) (vector (lqtree-vector lqtree)) seen)
+    (labels ((stack-contents (index rest)
+               (let ((space (aref vector index)))
+                 (if (empty-space-p space)
+                     rest
+                     (cons (space-contents space) rest))))
+             (rec (d i seen)
+               (when (<= d depth)
+                 (loop :with length = (linear-quad-length (1- d))
+                       :for h :below 2
+                       :do (loop :for w :below 2
+                                 :for index
+                                      = (logior (ash i 2)
+                                                (smallest-space-index w h))
+                                 :do (let ((seen
+                                            (stack-contents (+ length index)
+                                                            seen)))
+                                       (when seen
+                                         (funcall call-back seen))
+                                       (rec (1+ d) index seen)))))))
+      ;; Root space is special.
+      (setf seen (stack-contents 0 nil))
+      (when seen
+        (funcall call-back seen))
+      (when (< 0 depth)
+        (rec 1 0 seen)))))
 
 (defun pprint-lqtree (lqtree)
   (labels ((rec (depth)
