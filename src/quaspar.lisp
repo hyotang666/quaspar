@@ -244,6 +244,11 @@
       (incf sum))
     sum))
 
+(defun list-of-stored (stored acc)
+  (if (null (next stored))
+      (cons stored acc)
+      (list-of-stored (next stored) (cons stored acc))))
+
 (defmacro do-unique-pair (((a b) space) &body body)
   `(do-stored (,a ,space)
      (when (next ,a)
