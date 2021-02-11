@@ -327,11 +327,11 @@
 
 #+syntax (STORE storable space) ; => result
 
-#?(store (make-instance 'lqtree-storable :max-w 100 :max-h 100)
+#?(store (make-instance 'lqtree-storable)
          (quaspar::make-space))
 :satisfies (lambda (o)
              (& (typep o 'lqtree-storable)
-                (= 85 (index o))
+                (not (slot-boundp o 'index))
                 (typep (rect o) 'rect)
                 (= 0 (x (rect o)))
                 (= 0 (y (rect o)))
@@ -343,9 +343,9 @@
 ; Stored object is pushed last.
 ; Objects are linked.
 #?(let ((space (quaspar::make-space)))
-    (store (make-instance 'lqtree-storable :max-w 100 :max-h 100)
+    (store (make-instance 'lqtree-storable)
            space)
-    (store (make-instance 'lqtree-storable :x 1 :max-w 100 :max-h 100)
+    (store (make-instance 'lqtree-storable :x 1)
            space)
     space)
 :satisfies (lambda (o)
@@ -384,11 +384,11 @@
                     :around (let ((space (quaspar::make-space))
                                   first between last)
                               (declare (ignorable first between last))
-                              (store (setf first (make-instance 'lqtree-storable :max-w 100 :max-h 100))
+                              (store (setf first (make-instance 'lqtree-storable))
                                      space)
-                              (store (setf between (make-instance 'lqtree-storable :x 1 :max-w 100 :max-h 100))
+                              (store (setf between (make-instance 'lqtree-storable :x 1))
                                      space)
-                              (store (setf last (make-instance 'lqtree-storable :x 2 :max-w 100 :max-h 100))
+                              (store (setf last (make-instance 'lqtree-storable :x 2))
                                      space)
                               (call-body)))
 
@@ -427,7 +427,7 @@
 
 ; Case only one element.
 #?(let ((space (quaspar::make-space)) a)
-    (store (setf a (make-instance 'lqtree-storable :max-w 10 :max-h 10)) space)
+    (store (setf a (make-instance 'lqtree-storable)) space)
     (delete-from-space a space)
     space)
 :satisfies (lambda (o)
@@ -467,9 +467,9 @@
 :signals condition
 ; Bound by lqtree-storable.
 #?(let ((space (quaspar::make-space)))
-    (store (make-instance 'lqtree-storable :max-w 100 :max-h 100) space)
-    (store (make-instance 'lqtree-storable :x 1 :max-w 100 :max-h 100) space)
-    (store (make-instance 'lqtree-storable :x 2 :max-w 100 :max-h 100) space)
+    (store (make-instance 'lqtree-storable) space)
+    (store (make-instance 'lqtree-storable :x 1) space)
+    (store (make-instance 'lqtree-storable :x 2) space)
     (do-stored (v space)
       (unless (typep v 'lqtree-storable)
         (error "Not lqtree-storable object."))))
@@ -477,9 +477,9 @@
 
 ; Iterate over lqtree-storable in the space.
 #?(let ((space (quaspar::make-space)))
-    (store (make-instance 'lqtree-storable :max-w 100 :max-h 100) space)
-    (store (make-instance 'lqtree-storable :x 1 :max-w 100 :max-h 100) space)
-    (store (make-instance 'lqtree-storable :x 2 :max-w 100 :max-h 100) space)
+    (store (make-instance 'lqtree-storable) space)
+    (store (make-instance 'lqtree-storable :x 1) space)
+    (store (make-instance 'lqtree-storable :x 2) space)
     (do-stored (v space)
       (prin1 (x (rect v)))))
 :outputs "012"
@@ -681,7 +681,7 @@
 #+syntax (ADD storable lqtree) ; => result
 
 #?(let ((tree (make-lqtree 100 100 1)))
-    (add (make-instance 'lqtree-storable :x 0 :y 0 :max-w 100 :max-h 100 :depth 1)
+    (add (make-instance 'lqtree-storable :x 0 :y 0)
          tree)
     tree)
 :satisfies (lambda (tree)
@@ -700,9 +700,9 @@
 
 ; Automatically space is linked.
 #?(let ((tree (make-lqtree 100 100 1)))
-    (add (make-instance 'lqtree-storable :x 0 :y 0 :max-w 100 :max-h 100 :depth 1)
+    (add (make-instance 'lqtree-storable :x 0 :y 0)
          tree)
-    (add (make-instance 'lqtree-storable :x 0 :y 1 :max-w 100 :max-h 100 :depth 1)
+    (add (make-instance 'lqtree-storable :x 0 :y 1)
          tree)
     tree)
 :satisfies (lambda (tree)
@@ -765,19 +765,13 @@
                                   first second last)
                               (declare (ignorable first second last))
                               (add (setf first (make-instance 'lqtree-storable
-                                                              :x 0 :y 0
-                                                              :max-w 100 :max-h 100
-                                                              :depth 1))
+                                                              :x 0 :y 0))
                                    tree)
                               (add (setf second (make-instance 'lqtree-storable
-                                                               :x 0 :y 1
-                                                               :max-w 100 :max-h 100
-                                                               :depth 1))
+                                                               :x 0 :y 1))
                                    tree)
                               (add (setf last (make-instance 'lqtree-storable
-                                                             :x 0 :y 2
-                                                             :max-w 100 :max-h 100
-                                                             :depth 1))
+                                                             :x 0 :y 2))
                                    tree)
                               (call-body)))
 
@@ -829,19 +823,13 @@
                                   first second last)
                               (declare (ignorable first second last))
                               (add (setf first (make-instance 'lqtree-storable
-                                                              :x 0 :y 0
-                                                              :max-w 100 :max-h 100
-                                                              :depth 1))
+                                                              :x 0 :y 0))
                                    tree)
                               (add (setf second (make-instance 'lqtree-storable
-                                                               :x 0 :y 1
-                                                               :max-w 100 :max-h 100
-                                                               :depth 1))
+                                                               :x 0 :y 1))
                                    tree)
                               (add (setf last (make-instance 'lqtree-storable
-                                                             :x 0 :y 2
-                                                             :max-w 100 :max-h 100
-                                                             :depth 1))
+                                                             :x 0 :y 2))
                                    tree)
                               (call-body)))
 
@@ -886,23 +874,15 @@
         first second last)
     ;; This is stored in root space
     (add (setf first (make-instance 'lqtree-storable
-                                    :x 0 :y 0
-                                    :w 98
-                                    :max-w 100 :max-h 100
-                                    :depth 3))
+                                    :x 0 :y 0 :w 98))
          tree)
     ;; This is stored the third depth (smallest) space.
     (add (setf second (make-instance 'lqtree-storable
-                                     :x 0 :y 1
-                                     :max-w 100 :max-h 100
-                                     :depth 3))
+                                     :x 0 :y 1))
          tree)
     ;; This is stored the second depth space.
     (add (setf last (make-instance 'lqtree-storable
-                                   :x 0 :y 0
-                                   :h 15
-                                   :max-w 100 :max-h 100
-                                   :depth 3))
+                                   :x 0 :y 0 :h 15))
          tree)
     (traverse tree (lambda (list) (prin1 (length list)))))
 :outputs "123"

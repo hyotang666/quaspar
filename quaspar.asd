@@ -2,13 +2,16 @@
 (in-package :asdf)
 (defsystem "quaspar"
   :version
-  "5.4.1"
+  "5.5.0"
   :depends-on
   nil
   :pathname
   "src/"
   :components
-  ((:file "quaspar")))
+  ((:file "quaspar"))
+  :author "SATO Shinichi"
+  :license "MIT"
+  :description "QUAternary Spatial PARtitioning tree especially for game engine.")
 
 ;;; These forms below are added by JINGOH.GENERATOR.
 ;; Ensure in ASDF for pretty printings.

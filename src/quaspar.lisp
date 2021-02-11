@@ -178,17 +178,13 @@
          ;; NIL means last of the list.
          :type (or null lqtree-storable)
          :documentation "Next object of the list."))
-  (:default-initargs :x 0 :y 0 :w 0 :h 0 :depth 4 :rect-constructor 'make-rect)
+  (:default-initargs :x 0 :y 0 :w 0 :h 0 :rect-constructor 'make-rect)
   (:documentation "Inherit this to store object for lqtree."))
 
 (defmethod initialize-instance
-           ((o lqtree-storable)
-            &rest args
-            &key x y w h (max-w (error "MAX-W is required."))
-            (max-h (error "MAX-H is reqrured.")) depth rect-constructor)
+           ((o lqtree-storable) &rest args &key x y w h rect-constructor)
   (let ((rect (funcall rect-constructor :x x :y y :w w :h h)))
-    (apply #'call-next-method o :index (linear-index rect max-w max-h depth)
-           :rect rect args)))
+    (apply #'call-next-method o :rect rect args)))
 
 (declaim
  (ftype (function (lqtree-storable space) (values &optional))
@@ -297,6 +293,9 @@
         add))
 
 (defun add (storable lqtree)
+  (setf (index storable)
+          (linear-index (rect storable) (w lqtree) (h lqtree)
+                        (lqtree-depth lqtree)))
   (store storable
          (aref (lqtree-vector lqtree)
                (linear-index (rect storable) (w lqtree) (h lqtree)
