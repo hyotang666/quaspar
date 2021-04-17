@@ -299,7 +299,7 @@
                (out-of-space lqtree)))))
 
 (defun traverse (lqtree &optional (call-back 'print))
-  "Iterate depth first manner."
+  "Iterate depth first manner. Ignore out of space objects."
   (let ((depth (lqtree-depth lqtree)) (vector (lqtree-vector lqtree)) seen)
     (labels ((stack-contents (index rest)
                (let ((space (aref vector index)))
