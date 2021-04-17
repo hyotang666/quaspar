@@ -40,8 +40,6 @@ Use `QUASPAR:ADD` to add.
 ```
 
 ### MOVE
-Horizontal position and vertical position is must zero to lesser than the max value that
-specified when `QUASPAR:MAKE-LQTREE`.
 
 ```lisp
 * (quaspar:move *player* 15 13 *tree*)
