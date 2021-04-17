@@ -55,8 +55,7 @@
 
 (declaim
  (ftype (function
-         (&key (:x integer) (:y integer) (:w (integer 0 *))
-          (:h (integer 0 *)))
+         (&key (:x integer) (:y integer) (:w (integer 0 *)) (:h (integer 0 *)))
          (values rect &optional))
         make-rect))
 
@@ -252,7 +251,9 @@
       :type (integer 0 *)
       :reader h
       :documentation "Max height of the root space.")
-   (out-of-space :initform (make-space) :type space :reader out-of-space
+   (out-of-space :initform (make-space)
+                 :type space
+                 :reader out-of-space
                  :documentation "A space for the out of space objects.")
    (vector :reader lqtree-vector :type vector)
    (depth :initarg :depth :type depth :reader lqtree-depth))
