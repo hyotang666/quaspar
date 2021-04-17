@@ -294,13 +294,11 @@
         add))
 
 (defun add (storable lqtree)
-  (setf (index storable)
-          (linear-index (rect storable) (w lqtree) (h lqtree)
-                        (lqtree-depth lqtree)))
   (store storable
          (aref (lqtree-vector lqtree)
-               (linear-index (rect storable) (w lqtree) (h lqtree)
-                             (lqtree-depth lqtree)))))
+               (setf (index storable)
+                       (linear-index (rect storable) (w lqtree) (h lqtree)
+                                     (lqtree-depth lqtree))))))
 
 (defun traverse (lqtree &optional (call-back 'print))
   "Iterate depth first manner."
