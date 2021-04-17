@@ -136,9 +136,10 @@
 
 (defun linear-index (rect max-w max-h depth)
   "Compute index of background linear quad tree's vector."
-  (let ((vert (+ (x rect) (w rect))) (hor (+ (y rect) (h rect))))
-    (assert (< -1 vert max-w) () 'out-of-space :name 'x :rect rect :max max-w)
-    (assert (< -1 hor max-h) () 'out-of-space :name 'y :rect rect :max max-h)
+  (assert (< -1 (x rect) max-w) () 'out-of-space :name 'x :rect rect :max max-w)
+  (assert (< -1 (y rect) max-h) () 'out-of-space :name 'y :rect rect :max max-h)
+  (let ((vert (max 0 (min (1- max-w) (+ (x rect) (w rect)))))
+        (hor (max 0 (min (1- max-h)(+ (y rect) (h rect))))))
     (let* ((left-top
             (multiple-value-call #'smallest-space-index
               (morton-cord (x rect) (y rect) max-w max-h depth)))

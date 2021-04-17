@@ -669,10 +669,6 @@
 ;;;; Notes:
 
 ;;;; Exceptional-Situations:
-; When RECT over the max range, OUT-OF-RANGE is signaled.
-; NOTE: Max width and height is exclusive.
-#?(space (make-rect :x 0 :y 0 :w 100 :h 2) tree)
-:signals out-of-space
 
 (requirements-about ADD :doc-type function)
 
