@@ -222,23 +222,6 @@
 
 ;;;; Exceptional-Situations:
 
-(requirements-about OUT-OF-SPACE :doc-type TYPE)
-
-;;;; Description:
-
-;;;; Effective Slots:
-
-; RECT [Type] T
-; [READER] rect
-
-; MAX [Type] T
-; [READER] max-of
-
-; NAME [Type] T
-; [READER] cell-error-name
-
-;;;; Notes:
-
 (requirements-about RECT :doc-type TYPE)
 
 ;;;; Description:
@@ -248,10 +231,10 @@
 
 ;;;; Effective Slots:
 
-; X [Type] (INTEGER 0 *)
+; X [Type] INTEGER
 ; [ACCESSOR] x
 
-; Y [Type] (INTEGER 0 *)
+; Y [Type] INTEGER
 ; [ACCESSOR] y
 
 ; W [Type] (INTEGER 0 *)
@@ -273,9 +256,9 @@
 
 ;;;; Arguments and Values:
 
-; x := unsigned-byte
+; x := signed-byte
 
-; y := unsigned-byte
+; y := signed-byte
 
 ; w := unsigned-byte
 
@@ -575,6 +558,10 @@
 ; [READER] h
 ; Max height of the root space.
 
+; OUT-OF-SPACE [Type] SPACE
+; [READER] out-of-space
+; A space for the out of space objects.
+
 ; VECTOR [Type] VECTOR
 ; [READER] lqtree-vector
 
@@ -713,6 +700,20 @@
                 (eq (quaspar::space-last (aref (lqtree-vector tree) 1))
                     (next (quaspar::space-contents (aref (lqtree-vector tree) 1))))))
 
+; When a storable object is out of space, it is stored in out-of-space.
+#?(let ((tree (make-lqtree 100 100 1)))
+    (add (make-instance 'lqtree-storable :x -10 :y -10)
+         tree)
+    tree)
+:satisfies (lambda (tree)
+             (& (typep tree 'lqtree)
+                ;; Depth is specified 1.
+                (= 5 (length (lqtree-vector tree)))
+                ;; Any spece is empty.
+                (every #'quaspar::empty-space-p (lqtree-vector tree))
+                ;; Stored in out-of-space.
+                (quaspar::space-contents (out-of-space tree))))
+
 ;;;; Arguments and Values:
 
 ; storable := lqtree-storable
@@ -792,6 +793,24 @@
      (null (next (quaspar::space-contents (aref (lqtree-vector tree) 4))))
      (null (prev (quaspar::space-contents (aref (lqtree-vector tree) 1))))))
 
+; Case move to out-of-space
+#?(progn (move first -80 80 tree)
+         (values tree first second last))
+:multiple-value-satisfies
+(lambda (tree first second last)
+  (declare (ignore last))
+  (& (typep tree 'lqtree)
+     (= 5 (length (lqtree-vector tree)))
+     ;; first is moved to out-of-space.
+     (eq first (quaspar::space-contents (out-of-space tree)))
+     ;; Index is changed.
+     (null (index (quaspar::space-contents (out-of-space tree))))
+     ;; Now left upper space is second.
+     (eq second (quaspar::space-contents (aref (lqtree-vector tree) 1)))
+     ;; FIRST'next is set nil.
+     (null (next (quaspar::space-contents (out-of-space tree))))
+     (null (prev (quaspar::space-contents (aref (lqtree-vector tree) 1))))))
+
 ;;;; Arguments and Values:
 
 ; storable := 
@@ -811,8 +830,6 @@
 ;;;; Notes:
 
 ;;;; Exceptional-Situations:
-; When moved rect over the max range, out-of-space is signaled.
-#?(move first 100 100 tree) :signals out-of-space
 
 (requirements-about DO-LQTREE :doc-type function
                     :around (let ((tree (make-lqtree 100 100 1))

@@ -3,12 +3,11 @@
 (defpackage :quaspar
   (:shadow delete space)
   (:use :cl)
-  (:export ;;; Condition
-           #:out-of-space
-           ;;; LQTREE
+  (:export ;;; LQTREE
            #:lqtree ; type-name
            #:make-lqtree ; constructor
            #:space ; node reader
+           #:out-of-space
            #:add
            #:delete
            #:move
@@ -44,8 +43,8 @@
 ;; In order to update cordinates at once, we needs RECT object.
 
 (defclass rect ()
-  ((x :initarg :x :initform 0 :accessor x :type (integer 0 *))
-   (y :initarg :y :initform 0 :accessor y :type (integer 0 *))
+  ((x :initarg :x :initform 0 :accessor x :type integer)
+   (y :initarg :y :initform 0 :accessor y :type integer)
    (w :initarg :w :initform 0 :reader w :type (integer 0 *))
    (h :initarg :h :initform 0 :reader h :type (integer 0 *)))
   (:documentation "The default rect object for LQTREE-STORABLE."))
@@ -56,23 +55,13 @@
 
 (declaim
  (ftype (function
-         (&key (:x (integer 0 *)) (:y (integer 0 *)) (:w (integer 0 *))
+         (&key (:x integer) (:y integer) (:w (integer 0 *))
           (:h (integer 0 *)))
          (values rect &optional))
         make-rect))
 
 (defun make-rect (&key (x 0) (y 0) (w 0) (h 0))
   (make-instance 'rect :x x :y y :w w :h h))
-
-;;;; CONDITION
-
-(define-condition out-of-space (cell-error)
-  ((rect :initarg :rect :reader rect)
-   (max :initarg :max :reader max-of))
-  (:report
-   (lambda (condition stream)
-     (format stream "~S is out of ~S in range ~S." (rect condition)
-             (max-of condition) (cell-error-name condition)))))
 
 ;;;; MORON-NUMBER-INDEX
 
@@ -136,19 +125,18 @@
 
 (defun linear-index (rect max-w max-h depth)
   "Compute index of background linear quad tree's vector."
-  (assert (< -1 (x rect) max-w) () 'out-of-space :name 'x :rect rect :max max-w)
-  (assert (< -1 (y rect) max-h) () 'out-of-space :name 'y :rect rect :max max-h)
-  (let ((vert (max 0 (min (1- max-w) (+ (x rect) (w rect)))))
-        (hor (max 0 (min (1- max-h)(+ (y rect) (h rect))))))
-    (let* ((left-top
-            (multiple-value-call #'smallest-space-index
-              (morton-cord (x rect) (y rect) max-w max-h depth)))
-           (right-bottom
-            (multiple-value-call #'smallest-space-index
-              (morton-cord vert hor max-w max-h depth)))
-           (space-depth (depth left-top right-bottom)))
-      (+ (linear-quad-length (- depth space-depth 1))
-         (space-local-index left-top space-depth)))))
+  (let ((vert (+ (x rect) (w rect))) (hor (+ (y rect) (h rect))))
+    (unless (or (< vert 0) (<= max-w vert) (< hor 0) (<= max-h hor))
+      (let* ((left-top
+              (multiple-value-call #'smallest-space-index
+                (morton-cord (x rect) (y rect) max-w max-h depth)))
+             (right-bottom
+              (multiple-value-call #'smallest-space-index
+                (morton-cord (max 0 (min (1- max-w) vert))
+                             (max 0 (min (1- max-h) hor)) max-w max-h depth)))
+             (space-depth (depth left-top right-bottom)))
+        (+ (linear-quad-length (- depth space-depth 1))
+           (space-local-index left-top space-depth))))))
 
 ;;;; SPACE
 
@@ -264,6 +252,8 @@
       :type (integer 0 *)
       :reader h
       :documentation "Max height of the root space.")
+   (out-of-space :initform (make-space) :type space :reader out-of-space
+                 :documentation "A space for the out of space objects.")
    (vector :reader lqtree-vector :type vector)
    (depth :initarg :depth :type depth :reader lqtree-depth))
   (:default-initargs :depth 4)
@@ -286,19 +276,24 @@
 
 (defun space (rect lqtree)
   "Return SPACE object that is RECT should be in from LQTREE."
-  (aref (lqtree-vector lqtree)
-        (linear-index rect (w lqtree) (h lqtree) (lqtree-depth lqtree))))
+  (let ((index (linear-index rect (w lqtree) (h lqtree) (lqtree-depth lqtree))))
+    (if index
+        (aref (lqtree-vector lqtree) index)
+        (out-of-space lqtree))))
 
 (declaim
  (ftype (function (lqtree-storable lqtree) (values lqtree-storable &optional))
         add))
 
 (defun add (storable lqtree)
-  (store storable
-         (aref (lqtree-vector lqtree)
-               (setf (index storable)
-                       (linear-index (rect storable) (w lqtree) (h lqtree)
-                                     (lqtree-depth lqtree))))))
+  (let ((index
+         (setf (index storable)
+                 (linear-index (rect storable) (w lqtree) (h lqtree)
+                               (lqtree-depth lqtree)))))
+    (store storable
+           (if index
+               (aref (lqtree-vector lqtree) index)
+               (out-of-space lqtree)))))
 
 (defun traverse (lqtree &optional (call-back 'print))
   "Iterate depth first manner."
@@ -359,7 +354,11 @@
                  ,@body))))
 
 (defun delete (storable lqtree)
-  (delete-from-space storable (aref (lqtree-vector lqtree) (index storable))))
+  (delete-from-space storable
+                     (let ((index (index storable)))
+                       (if index
+                           (aref (lqtree-vector lqtree) index)
+                           (out-of-space lqtree)))))
 
 (defun move (storable x y lqtree)
   (setf (x (rect storable)) x
@@ -367,9 +366,12 @@
   (let ((new-space
          (linear-index (rect storable) (w lqtree) (h lqtree)
                        (lqtree-depth lqtree))))
-    (if (= new-space (index storable))
+    (if (eql new-space (index storable))
         storable
         (progn
          (delete storable lqtree)
          (setf (index storable) new-space)
-         (store storable (aref (lqtree-vector lqtree) new-space))))))
+         (store storable
+                (if new-space
+                    (aref (lqtree-vector lqtree) new-space)
+                    (out-of-space lqtree)))))))
