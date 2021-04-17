@@ -350,11 +350,14 @@
     (rec 0)))
 
 (defmacro do-lqtree ((var lqtree) &body body)
-  "Iterate over every objects in lqtree."
-  (let ((space (gensym "SPACE")))
-    `(loop :for ,space :across (lqtree-vector ,lqtree)
+  "Iterate over every objects in lqtree. Including out of spece objects."
+  (let ((space (gensym "SPACE")) (vtree (gensym "VTREE")))
+    `(loop :with ,vtree = ,lqtree
+           :for ,space :across (lqtree-vector ,vtree)
            :do (do-stored (,var ,space)
-                 ,@body))))
+                 ,@body)
+           :finally (do-stored (,var (out-of-space ,vtree))
+                      ,@body))))
 
 (defun delete (storable lqtree)
   (delete-from-space storable
