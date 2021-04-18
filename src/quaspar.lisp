@@ -215,14 +215,14 @@
             (space-last space) storable)))
 
 (defmacro do-stored ((var space) &body body)
-  (let ((s (gensym "SPACE")))
-    `(let ((,s (the space ,space)))
-       (unless (empty-space-p ,s)
-         (do ((,var (space-contents ,s) (next ,var)))
-             (nil)
-          ,@body
-           (when (null (next ,var))
-             (return)))))))
+  (let ((rec (gensym "REC")) (s (gensym "SPACE")))
+    `(labels ((,rec (,var)
+                (tagbody ,@body)
+                (when (next ,var)
+                  (,rec (next ,var)))))
+       (let ((,s (the space ,space)))
+         (unless (empty-space-p ,s)
+           (,rec (space-contents ,s)))))))
 
 (defun count-stored (space)
   (let ((sum 0))
@@ -349,7 +349,7 @@
                (rec (1+ depth)))))
     (rec 0)))
 
-(defmacro do-lqtree ((var lqtree) &body body)
+(defmacro do-lqtree ((var lqtree &optional return) &body body)
   "Iterate over every objects in lqtree. Including out of spece objects."
   (let ((space (gensym "SPACE")) (vtree (gensym "VTREE")))
     `(loop :with ,vtree = ,lqtree
@@ -357,7 +357,8 @@
            :do (do-stored (,var ,space)
                  ,@body)
            :finally (do-stored (,var (out-of-space ,vtree))
-                      ,@body))))
+                      ,@body)
+                    (return ,return))))
 
 (defun delete (storable lqtree)
   (delete-from-space storable

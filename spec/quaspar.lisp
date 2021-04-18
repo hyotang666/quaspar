@@ -850,11 +850,38 @@
 ;;;; Description:
 ; Iterate over every objects in lqtree.
 
-#+syntax (DO-LQTREE (var lqtree) &body body) ; => result
+#+syntax (DO-LQTREE (var lqtree &optional return) &body body) ; => result
 
 #?(do-lqtree (v tree)
     (prin1 (y (rect v))))
 :outputs "012"
+
+; Like CL:DOLIST, RETURN form is evaluated and return its value at last.
+#?(do-lqtree (v tree :this-is-returned)
+    (print v))
+=> :THIS-IS-RETURNED
+,:stream nil
+
+; Liks CL:DOLIST, the body is wrapped with BLOCK NIL implicitly.
+#?(do-lqtree (v tree (print :never))
+    (when (eql 1 (y (rect v)))
+      (return t)))
+=> T
+
+; In such case, iteration is imediately stopped.
+#?(do-lqtree (v tree (print :never))
+    (prin1 (y (rect v)))
+    (when (eql 1 (y (rect v)))
+      (return t)))
+:outputs "01"
+
+; Additionally, the body is wrapped with TAGBODY implicitly.
+#?(do-lqtree (v tree)
+    (when (eql 1 (y (rect v)))
+      (go :end))
+    (prin1 (y (rect v)))
+    :end)
+:outputs "02"
 
 ;;;; Arguments and Values:
 
