@@ -11,6 +11,7 @@
            #:add
            #:delete
            #:move
+           #:clear-lqtree
            #:do-lqtree ; iterate macro.
            #:traverse ; interate function.
            ;;; RECT
@@ -382,3 +383,11 @@
                 (if new-space
                     (aref (lqtree-vector lqtree) new-space)
                     (out-of-space lqtree)))))))
+
+(defun clear-lqtree (lqtree)
+  (flet ((clear-space (space)
+           (setf (car space) nil
+                 (cdr space) nil)))
+    (clear-space (out-of-space lqtree))
+    (map nil #'clear-space (lqtree-vector lqtree)))
+  t)
