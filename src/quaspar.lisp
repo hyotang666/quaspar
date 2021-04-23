@@ -241,7 +241,7 @@
     `(loop :for ,l :on ,list
            :for ,a = (car ,l)
            :do (loop :for ,b :in (cdr ,l)
-                     :do (progn ,@body)))))
+                     :do (tagbody ,@body)))))
 
 ;;;; LQTREE
 
