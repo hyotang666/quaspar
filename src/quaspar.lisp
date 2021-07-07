@@ -40,23 +40,33 @@
 
 (in-package :quaspar)
 
+(declaim (optimize speed))
+
 ;;;; RECT
 ;; In order to update cordinates at once, we needs RECT object.
 
+(deftype coord () 'fixnum)
+
+(deftype valid-coord () '(integer 0 #.most-positive-fixnum))
+
 (defclass rect ()
-  ((x :initarg :x :initform 0 :accessor x :type integer)
-   (y :initarg :y :initform 0 :accessor y :type integer)
-   (w :initarg :w :initform 0 :reader w :type (integer 0 *))
-   (h :initarg :h :initform 0 :reader h :type (integer 0 *)))
+  ((x :initarg :x :initform 0 :accessor x :type coord)
+   (y :initarg :y :initform 0 :accessor y :type coord)
+   (w :initarg :w :initform 0 :reader w :type valid-coord)
+   (h :initarg :h :initform 0 :reader h :type valid-coord))
   (:documentation "The default rect object for LQTREE-STORABLE."))
+
+(declaim (ftype (function (t) (values coord &optional)) x y)
+         (ftype (function (t) (values valid-coord &optional)) w h))
 
 (defmethod print-object ((o rect) stream)
   (print-unreadable-object (o stream :type t)
-    (format stream "x ~S y ~S w ~S h ~S" (x o) (y o) (w o) (h o))))
+    (funcall (formatter "x ~S y ~S w ~S h ~S") stream (x o) (y o) (w o) (h o))))
+
+(deftype box-size () '(integer 0 #.most-positive-fixnum))
 
 (declaim
- (ftype (function
-         (&key (:x integer) (:y integer) (:w (integer 0 *)) (:h (integer 0 *)))
+ (ftype (function (&key (:x coord) (:y coord) (:w box-size) (:h box-size))
          (values rect &optional))
         make-rect))
 
@@ -65,8 +75,10 @@
 
 ;;;; MORON-NUMBER-INDEX
 
+(deftype linear-index () '(integer 0 #.array-total-size-limit))
+
 (declaim
- (ftype (function ((integer -1 *)) (values (integer 0 *) &optional))
+ (ftype (function ((integer -1 15)) (values linear-index &optional))
         linear-quad-length))
 
 (defun linear-quad-length (depth) (/ (1- (expt 4 (1+ depth))) 3))
@@ -82,8 +94,7 @@
   '(integer 0 15))
 
 (declaim
- (ftype (function
-         ((integer 0 *) (integer 0 *) (integer 0 *) (integer 0 *) depth)
+ (ftype (function (valid-coord valid-coord valid-coord valid-coord depth)
          (values (integer 0 *) (integer 0 *) &optional))
         morton-cord))
 
@@ -112,16 +123,29 @@
   "Convert morton cordinates to linear max depth morton space index."
   (logior (bit-separate x) (ash (bit-separate y) 1)))
 
+(declaim
+ (ftype (function (valid-coord valid-coord) (values depth &optional)) depth))
+
 (defun depth (left-top right-bottom)
   "Compute ocupied space's depth. 0 is the smallest."
-  (loop :for n = (logxor left-top right-bottom) :then (ash n -2)
-        :for i :upfrom 0
+  (loop :for n :of-type valid-coord = (logxor left-top right-bottom)
+             :then (ash n -2)
+        :for i :of-type depth :upfrom 0
         :if (zerop n)
           :return i))
+
+(declaim
+ (ftype (function (valid-coord depth) (values linear-index &optional))
+        space-local-index))
 
 (defun space-local-index (left-top ocupied-space-depth)
   "Compute linear index of an ocupied local space."
   (ash left-top (- (* 2 ocupied-space-depth))))
+
+(declaim
+ (ftype (function (t coord coord depth)
+         (values (or null linear-index) &optional))
+        linear-index))
 
 (defun linear-index (rect max-w max-h depth)
   "Compute index of background linear quad tree's vector."
@@ -174,7 +198,8 @@
 
 (defmethod initialize-instance
            ((o lqtree-storable) &rest args &key x y w h rect-constructor)
-  (let ((rect (funcall rect-constructor :x x :y y :w w :h h)))
+  (let ((rect
+         (funcall (coerce rect-constructor 'function) :x x :y y :w w :h h)))
     (apply #'call-next-method o :rect rect args)))
 
 (declaim
@@ -227,6 +252,7 @@
 
 (defun count-stored (space)
   (let ((sum 0))
+    (declare (type fixnum sum))
     (do-stored (v space)
       (incf sum))
     sum))
@@ -258,10 +284,13 @@
                  :type space
                  :reader out-of-space
                  :documentation "A space for the out of space objects.")
-   (vector :reader lqtree-vector :type vector)
+   (vector :reader lqtree-vector :type simple-vector)
    (depth :initarg :depth :type depth :reader lqtree-depth))
   (:default-initargs :depth 4)
   (:documentation "Linear Quad Tree."))
+
+(declaim (ftype (function (t) (values simple-vector &optional)) lqtree-vector)
+         (ftype (function (t) (values depth &optional)) lqtree-depth))
 
 (defmethod initialize-instance :after ((o lqtree) &key depth)
   (setf (slot-value o 'vector)
@@ -270,8 +299,7 @@
             (dotimes (i length vector) (setf (aref vector i) (make-space))))))
 
 (declaim
- (ftype (function ((integer 0 *) (integer 0 *) depth)
-         (values lqtree &optional))
+ (ftype (function (valid-coord valid-coord depth) (values lqtree &optional))
         make-lqtree))
 
 (defun make-lqtree (w h d) (make-instance 'lqtree :w w :h h :depth d))
@@ -299,9 +327,13 @@
                (aref (lqtree-vector lqtree) index)
                (out-of-space lqtree)))))
 
-(defun traverse (lqtree &optional (call-back 'print))
+(defun traverse
+       (lqtree
+        &optional (call-back 'print)
+        &aux (call-back (coerce call-back 'function)))
   "Iterate depth first manner. Ignore out of space objects."
   (let ((depth (lqtree-depth lqtree)) (vector (lqtree-vector lqtree)) seen)
+    (declare (type depth depth))
     (labels ((stack-contents (index rest)
                (let ((space (aref vector index)))
                  (if (empty-space-p space)
@@ -312,7 +344,7 @@
                  (loop :with length = (linear-quad-length (1- d))
                        :for h :below 2
                        :do (loop :for w :below 2
-                                 :for index
+                                 :for index :of-type linear-index
                                       = (logior (ash i 2)
                                                 (smallest-space-index w h))
                                  :do (let ((space
@@ -325,6 +357,9 @@
                                                     seen)))
                                              (funcall call-back seen)
                                              (rec (1+ d) index seen)))))))))
+      (declare
+        (ftype (function (depth linear-index list) (values null &optional))
+               rec))
       ;; Root space is special.
       (setf seen (stack-contents 0 nil))
       (when seen
@@ -348,6 +383,7 @@
                      (pprint-newline :mandatory))))
                (terpri)
                (rec (1+ depth)))))
+    (declare (ftype (function (depth) (values null &optional)) rec))
     (rec 0)))
 
 (defmacro do-lqtree ((var lqtree &optional return) &body body)
