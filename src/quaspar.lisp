@@ -49,12 +49,14 @@
 
 (deftype valid-coord () '(integer 0 #.most-positive-fixnum))
 
-(defclass rect ()
-  ((x :initarg :x :initform 0 :accessor x :type coord)
-   (y :initarg :y :initform 0 :accessor y :type coord)
-   (w :initarg :w :initform 0 :reader w :type valid-coord)
-   (h :initarg :h :initform 0 :reader h :type valid-coord))
-  (:documentation "The default rect object for LQTREE-STORABLE."))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  ;; Optimization needs this eval-when.
+  (defclass rect ()
+    ((x :initarg :x :initform 0 :accessor x :type coord)
+     (y :initarg :y :initform 0 :accessor y :type coord)
+     (w :initarg :w :initform 0 :reader w :type valid-coord)
+     (h :initarg :h :initform 0 :reader h :type valid-coord))
+    (:documentation "The default rect object for LQTREE-STORABLE.")))
 
 (declaim (ftype (function (t) (values coord &optional)) x y)
          (ftype (function (t) (values valid-coord &optional)) w h))
@@ -182,19 +184,23 @@
 
 ;;;; LQTREE-STORABLE
 
-(defclass lqtree-storable ()
-  ((index :initarg :index :accessor index :documentation "Morton space index")
-   (rect :initarg :rect :reader rect)
-   (prev :initform nil :initarg :prev :accessor prev
-         ;; NIL means top of the list.
-         :type (or null lqtree-storable)
-         :documentation "Previous object of the list.")
-   (next :initform nil :initarg :next :accessor next
-         ;; NIL means last of the list.
-         :type (or null lqtree-storable)
-         :documentation "Next object of the list."))
-  (:default-initargs :x 0 :y 0 :w 0 :h 0 :rect-constructor 'make-rect)
-  (:documentation "Inherit this to store object for lqtree."))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  ;; Optimization needs this eval-when.
+  (defclass lqtree-storable ()
+    ((index :initarg :index
+            :accessor index
+            :documentation "Morton space index")
+     (rect :initarg :rect :reader rect)
+     (prev :initform nil :initarg :prev :accessor prev
+           ;; NIL means top of the list.
+           :type (or null lqtree-storable)
+           :documentation "Previous object of the list.")
+     (next :initform nil :initarg :next :accessor next
+           ;; NIL means last of the list.
+           :type (or null lqtree-storable)
+           :documentation "Next object of the list."))
+    (:default-initargs :x 0 :y 0 :w 0 :h 0 :rect-constructor 'make-rect)
+    (:documentation "Inherit this to store object for lqtree.")))
 
 (defmethod initialize-instance
            ((o lqtree-storable) &rest args &key x y w h rect-constructor)
@@ -271,23 +277,25 @@
 
 ;;;; LQTREE
 
-(defclass lqtree ()
-  ((w :initarg :w
-      :type (integer 0 *)
-      :reader w
-      :documentation "Max width of the root space.")
-   (h :initarg :h
-      :type (integer 0 *)
-      :reader h
-      :documentation "Max height of the root space.")
-   (out-of-space :initform (make-space)
-                 :type space
-                 :reader out-of-space
-                 :documentation "A space for the out of space objects.")
-   (vector :reader lqtree-vector :type simple-vector)
-   (depth :initarg :depth :type depth :reader lqtree-depth))
-  (:default-initargs :depth 4)
-  (:documentation "Linear Quad Tree."))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  ;; Optimization needs this eval-when.
+  (defclass lqtree ()
+    ((w :initarg :w
+        :type (integer 0 *)
+        :reader w
+        :documentation "Max width of the root space.")
+     (h :initarg :h
+        :type (integer 0 *)
+        :reader h
+        :documentation "Max height of the root space.")
+     (out-of-space :initform (make-space)
+                   :type space
+                   :reader out-of-space
+                   :documentation "A space for the out of space objects.")
+     (vector :reader lqtree-vector :type simple-vector)
+     (depth :initarg :depth :type depth :reader lqtree-depth))
+    (:default-initargs :depth 4)
+    (:documentation "Linear Quad Tree.")))
 
 (declaim (ftype (function (t) (values simple-vector &optional)) lqtree-vector)
          (ftype (function (t) (values depth &optional)) lqtree-depth))
